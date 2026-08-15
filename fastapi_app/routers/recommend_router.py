@@ -149,6 +149,7 @@ def chat(
         flagged_questions = ", ".join(ctx.flagged_questions) or "none",
         profile_text      = ctx.profile_text or "general autism support",
         recommended_apps  = ", ".join(ctx.recommended_apps) or "none yet",
+        recommended_books = ", ".join(ctx.recommended_books) or "none yet",
     )
 
     history_turns = request.history[-20:]

@@ -108,6 +108,7 @@ class RecommendedApp(BaseModel):
     rating      : float
     price       : str
     description : str
+    url         : Optional[str] = None
     match_score : float = Field(..., description="TF-IDF cosine similarity score 0–100")
 
 
@@ -170,6 +171,7 @@ class RecommendedApp(BaseModel):
     rating      : float
     price       : str
     description : str
+    url         : Optional[str] = None
     match_score : float = Field(..., description="TF-IDF cosine similarity score 0–100")
 
 

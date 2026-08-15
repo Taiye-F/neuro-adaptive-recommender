@@ -234,7 +234,7 @@ async def screen(
                 "flagged_details": flagged_details,
                 "profile_text": profile_text,
                 "profile_explained": profile_explained,
-                # "recommendations": app_recs,
+                "recommendations": app_recs,
                 "book_recommendations": book_recs,
                 "model_card": state.model_card,
                 "screening_context": json.dumps(screening_context),

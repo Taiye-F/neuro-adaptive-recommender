@@ -244,9 +244,14 @@
     if (sendBtn) sendBtn.disabled = true;
 
     try {
+      const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
+
       const res = await fetch('/chat', {
         method : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body   : JSON.stringify({
           screening_context: SCREENING_CONTEXT,
           history          : chatHistory,

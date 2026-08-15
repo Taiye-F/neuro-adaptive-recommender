@@ -59,7 +59,7 @@ EVIDENCE_KEYWORDS = [
     "backed by research", "clinical trial", "published study"
 ]
 
-GEMINI_MODEL = "models/gemini-2.5-flash"
+GEMINI_MODEL = "models/gemini-3.5-flash"
 
 CHAT_SYSTEM_PROMPT = """\
 You are a warm, knowledgeable special education consultant named Nora.
@@ -424,6 +424,7 @@ def recommend_apps(profile_text: str, top_n: int) -> list[RecommendedApp]:
             rating=float(row.get("Rating", 0)),
             price=row.get("Price", ""),
             description=str(row.get("Description", ""))[:200],
+            url=row.get("App_Link"),
             match_score=float(row["match_score"]),
         )
         for i, row in top.iterrows()
