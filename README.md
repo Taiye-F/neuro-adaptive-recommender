@@ -144,5 +144,5 @@ streamlit run autism_streamlit_app.py
 
 ## Authors & Collaborators
 
-* *  *Taiye Janet Fagbolade* * — Data Scientist & ML Engineer
-* *  *Iyanu Arowosola* * — ML Engineer & Full-Stack Developer
+* *  *Taiye Janet Fagbolade* * — Principal Investigator, Machine Learning Engineering (XGBoost/NLP), Cloud Deployment, and UI/UX.
+* *  *Iyanu Arowosola* * — Technical Contributor (FastAPI integration).

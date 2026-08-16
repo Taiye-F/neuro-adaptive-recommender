@@ -1,7 +1,7 @@
 """
 Neuro-Adaptive Learning Recommender — Streamlit App
 =====================================================
-Authors : Taiye Janet Fagbolade | Iyanu Arowosola
+Authors : Taiye Janet Fagbolade: Principal Investigator, Machine Learning Engineering (XGBoost/NLP), Cloud Deployment, and UI/UX. | Iyanu Arowosola: Technical Contributor (FastAPI integration).
 Hackathon: Bluechips × Data Science Nigeria
 
 Fixes applied vs original:
@@ -629,7 +629,7 @@ if run:
 
 st.markdown("---")
 st.caption(
-    "Developed by **Taiye Janet Fagbolade | Iyanu Arowosola** · "
+    "Architected and Developed by **Taiye Janet Fagbolade | FastAPI Support by Iyanu Arowosola** · "
     "Bluechips × Data Science Nigeria Hackathon · "
     "⚠️ For screening purposes only — not a substitute for professional medical assessment."
 )

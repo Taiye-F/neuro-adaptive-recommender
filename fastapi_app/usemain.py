@@ -1,7 +1,7 @@
 """
 Neuro-Adaptive ASD Recommender — FastAPI Microservice
 ======================================================
-Authors : Taiye Janet Fagbolade | Iyanu Arowosola
+Authors : Taiye Janet Fagbolade: Principal Investigator, Machine Learning Engineering (XGBoost/NLP), Cloud Deployment, and UI/UX. | Iyanu Arowosola: Technical Contributor (FastAPI integration).
 Hackathon: Bluechips × Data Science Nigeria
 
 Endpoints

@@ -255,4 +255,4 @@ else:
             st.write(st.write(f"_{clean_html(row['Description'])[:150]}..._"))
 
 st.markdown("---")
-st.caption("Developed by Taiye Janet Fagbolade | Iyanu Arowosola")
+st.caption("Architected and Deployed by Taiye Janet Fagbolade | FastAPI Support by Iyanu Arowosola")
