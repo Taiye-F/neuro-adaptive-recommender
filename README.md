@@ -2,7 +2,7 @@
 
 **Bridging the Diagnostic Gap: AI-Powered Early Intervention for Toddlers**
 
-An intelligent screening and recommendation system that helps parents and caregivers identify Autism Spectrum Disorder (ASD) traits in toddlers (12–36 months) and receive **personalized educational app recommendations** with **contextual AI guidance**.
+An intelligent screening and recommendation system that helps parents and caregivers identify Autism Spectrum Disorder (ASD) traits in toddlers (12–48 months) and receive **personalized educational app recommendations** with **contextual AI guidance**.
 
 ---
 
@@ -67,7 +67,7 @@ neuro-adaptive-recommender/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Sevenwings26/neuro-adaptive-recommender.git
+git clone https://github.com/Taiye-F/neuro-adaptive-recommender.git
 cd neuro-adaptive-recommender
 ```
 
@@ -144,5 +144,7 @@ streamlit run autism_streamlit_app.py
 
 ## Authors & Collaborators
 
-* *  *Taiye Janet Fagbolade* * — Principal Investigator, Machine Learning Engineering (XGBoost/NLP), Cloud Deployment, and UI/UX.
-* *  *Iyanu Arowosola* * — Technical Contributor (FastAPI integration).
+* *  *Taiye Janet Fagbolade* * — Principal Investigator, Machine Learning Engineering (XGBoost/ NLP), Cloud Deployment, and UI/UX.
+* *  *Iyanu Arowosola* * — Technical Contributor (FastAPI integration)
+ 
+Disclaimer: NALR is a digital triage and recommendation tool, not a substitute for a formal medical diagnosis. Always consult a licensed pediatric neurologist or healthcare professional.
