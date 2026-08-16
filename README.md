@@ -146,3 +146,5 @@ streamlit run autism_streamlit_app.py
 
 * *  *Taiye Janet Fagbolade* * — Principal Investigator, Machine Learning Engineering (XGBoost/ NLP), Cloud Deployment, and UI/UX.
 * *  *Iyanu Arowosola* * — Technical Contributor (FastAPI integration)
+ 
+Disclaimer: NALR is a digital triage and recommendation tool, not a substitute for a formal medical diagnosis. Always consult a licensed pediatric neurologist or healthcare professional.
