@@ -67,7 +67,7 @@ neuro-adaptive-recommender/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Sevenwings26/neuro-adaptive-recommender.git
+git clone https://github.com/Taiye-F/neuro-adaptive-recommender.git
 cd neuro-adaptive-recommender
 ```
 
