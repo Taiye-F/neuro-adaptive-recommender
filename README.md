@@ -2,7 +2,7 @@
 
 **Bridging the Diagnostic Gap: AI-Powered Early Intervention for Toddlers**
 
-An intelligent screening and recommendation system that helps parents and caregivers identify Autism Spectrum Disorder (ASD) traits in toddlers (12–36 months) and receive **personalized educational app recommendations** with **contextual AI guidance**.
+An intelligent screening and recommendation system that helps parents and caregivers identify Autism Spectrum Disorder (ASD) traits in toddlers (12–48 months) and receive **personalized educational app recommendations** with **contextual AI guidance**.
 
 ---
 
@@ -144,5 +144,5 @@ streamlit run autism_streamlit_app.py
 
 ## Authors & Collaborators
 
-* *  *Taiye Janet Fagbolade* * — Data Scientist & ML Engineer
-* *  *Iyanu Arowosola* * — ML Engineer & Full-Stack Developer
+* *  *Taiye Janet Fagbolade* * — Principal Investigator, Machine Learning Engineering (XGBoost/ NLP), Cloud Deployment, and UI/UX.
+* *  *Iyanu Arowosola* * — Technical Contributor (FastAPI integration)
