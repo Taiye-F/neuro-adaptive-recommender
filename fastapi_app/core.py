@@ -201,48 +201,24 @@ def _tag_evidence(row: pd.Series) -> pd.Series:
 
 def _load_app_cache() -> None:
     """
-    Scrapes Google Play Store for live educational apps and merges them with evidence.
-    Falls back to local app_cache.json if offline or failed.
+    Loads educational apps directly from local app_cache.json fallback.
+    Live scraping is decoupled from startup to ensure instant readiness.
+    Use scripts/refresh_app_cache.py to periodically update the cache.
     """
     _load_evidence_lookup()
-    
-    scraped_success = False
-    app_data = []
 
-    log.info("Scraping live educational apps from Google Play Store...")
-    try:
-        search_results = search("autism speech therapy special education", lang="en", country="us")
-        top_apps = search_results[:50]
-        for result in top_apps:
-            try:
-                app_details = play_store_app(result['appId'], lang='en', country='us')
-                if app_details['genre'] in ['Education', 'Medical', 'Parenting']:
-                    app_data.append({
-                        'App_Name': app_details['title'],
-                        'Category': app_details['genre'],
-                        'Rating': round(app_details.get('score', 0), 2),
-                        'Price': "Free" if app_details.get('free') else "Paid",
-                        'Description': clean_html(app_details['description'])[:600],
-                        'App_Link': app_details['url']
-                    })
-            except Exception:
-                continue
-        if len(app_data) > 0:
-            state.df_apps = pd.DataFrame(app_data)
-            scraped_success = True
-            log.info("✓ Scraped %d live apps successfully", len(state.df_apps))
-    except Exception as e:
-        log.warning("Scraping failed (offline or rate-limited): %s. Falling back to local cache.", e)
-
-    if not scraped_success:
-        if APP_CACHE_PATH.exists():
+    if APP_CACHE_PATH.exists():
+        try:
             with open(APP_CACHE_PATH, encoding="utf-8") as f:
                 data = json.load(f)
             state.df_apps = pd.DataFrame(data)
-            log.info("✓ Loaded %d apps from local app_cache.json fallback", len(state.df_apps))
-        else:
-            log.warning("No app cache fallback available.")
+            log.info("? Loaded %d apps from local app_cache.json", len(state.df_apps))
+        except Exception as e:
+            log.error("Failed to load app_cache.json: %s", e)
             state.df_apps = pd.DataFrame()
+    else:
+        log.warning("app_cache.json not found. App recommendations will be unavailable.")
+        state.df_apps = pd.DataFrame()
 
     if not state.df_apps.empty:
         # Tag evidence
@@ -354,6 +330,7 @@ def predict_risk(scores: dict[str, Any]) -> float:
     """Maps Likert inputs to 0-4 values and runs prediction on the lean XGBoost model."""
     a1 = map_likert_standard(scores.get("A1", "Usually"))
     a2 = map_likert_standard(scores.get("A2", "Usually"))
+    a3 = map_likert_standard(scores.get("A3", "Usually"))
     a4 = map_likert_standard(scores.get("A4", "Usually"))
     a5 = map_likert_standard(scores.get("A5", "Usually"))
     a6 = map_likert_standard(scores.get("A6", "Usually"))
@@ -372,7 +349,7 @@ def predict_risk(scores: dict[str, Any]) -> float:
         'qchat5recode': a5,
         'qchat4recode': a4,
         'qchat10recode': a10,
-        'qchat15recode': a1,
+        'qchat15recode': a3,
         'qchat25recode': a9,
         'qchat11recode': a7,
         'qchat1recode': a1,

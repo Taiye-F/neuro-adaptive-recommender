@@ -85,6 +85,76 @@
     }
     .topbar-brand { font-family: var(--serif); font-size: 1.05rem; color: #5ecfc5; font-weight: 600; text-decoration: none; }
     .topbar-actions { display: flex; gap: 0.6rem; align-items: center; }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 19px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.25s ease-in-out;
+    }
+    .menu-toggle.open .bar:nth-child(1) {
+      transform: translateY(8.5px) rotate(45deg);
+    }
+    .menu-toggle.open .bar:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.open .bar:nth-child(3) {
+      transform: translateY(-8.5px) rotate(-45deg);
+    }
+
+    @media (max-width: 960px) {
+      .menu-toggle {
+        display: flex;
+      }
+      .topbar {
+        padding: 0.8rem 1.25rem;
+        flex-wrap: wrap;
+      }
+      .topbar-actions {
+        display: none !important;
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0 !important;
+        padding-top: 1rem;
+        margin-top: 0.6rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 0.65rem;
+        align-items: stretch !important;
+      }
+      .topbar-actions.open {
+        display: flex !important;
+        animation: navDrawerFade 0.2s ease-out;
+      }
+      .topbar-actions a, .topbar-actions button {
+        width: 100%;
+        text-align: left;
+        box-sizing: border-box;
+      }
+      .topbar-actions .user-chip {
+        text-align: center;
+        width: 100%;
+      }
+      .btn-chat-toggle {
+        justify-content: center;
+        text-align: center;
+      }
+      @keyframes navDrawerFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
     .topbar-back {
       font-family: var(--mono); font-size: 0.75rem; color: #8fa4b0;
       text-decoration: none; border: 1px solid rgba(255,255,255,0.12);
@@ -402,14 +472,26 @@
 <!-- ── Topbar ─────────────────────────────────────────────────────── -->
 <nav class="topbar">
   <a href="/" class="topbar-brand">NeuroAdapt</a>
-  <div class="topbar-actions" style="display:flex;align-items:center;gap:0.75rem;">
+  <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </button>
+  <div class="topbar-actions" id="topbarActions" style="display:flex;align-items:center;gap:0.75rem;">
     {% if user %}
-    <span style="font-family:var(--mono);font-size:0.74rem;color:#8fa4b8;margin-right:0.5rem;">User: <strong style="color:#5ecfc5;">{{ user.username }}</strong> ({{ user.role }})</span>
+    <span class="user-chip" style="font-family:var(--mono);font-size:0.74rem;color:#8fa4b8;margin-right:0.5rem;">User: <strong style="color:#5ecfc5;">{{ user.username }}</strong> ({{ user.role }})</span>
     {% endif %}
     <button class="btn-chat-toggle" onclick="toggleChat()" id="chatToggleBtn">
       <span class="dot"></span> Ask Nora AI
     </button>
     <a href="/" class="topbar-back">← New Screening</a>
+    <a href="{% if child %}/journey/{{ child.id }}{% else %}/journey{% endif %}" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Journey</a>
+    <a href="{% if child %}/schedule/{{ child.id }}{% else %}/schedule{% endif %}" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Schedules</a>
+    <a href="{% if child %}/meltdown/{{ child.id }}/active{% else %}/meltdown{% endif %}" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🚨 Meltdowns</a>
+    <a href="/evidence" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Evidence</a>
+    {% if user and user.role == 'clinician' %}
+    <a href="/clinician/dashboard" style="font-family:var(--mono);font-size:0.74rem;color:#5ecfc5;border:1px solid #5ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Caseload</a>
+    {% endif %}
     <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a>
     {% if user %}
     <button onclick="logout()" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;background:none;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;">Logout</button>
@@ -551,6 +633,51 @@
     </div>
 
   {% endif %}
+  
+  <!-- ── Phase 2: Next Steps & Longitudinal Continuity ── -->
+  <div class="card" style="background:linear-gradient(135deg, rgba(13,122,110,0.08) 0%, rgba(94,207,197,0.12) 100%);border:1px solid rgba(94,207,197,0.35);margin-top:2rem;margin-bottom:2rem;padding:1.75rem;">
+    <div style="margin-bottom:1rem;">
+      <h3 style="font-family:var(--serif);font-size:1.25rem;color:var(--ink);margin-bottom:0.25rem;">
+        {% if child %}Next Steps for {{ child.first_name }}{% else %}Next Steps & Continuity{% endif %}
+      </h3>
+      <p style="font-size:0.88rem;color:var(--ink-soft);line-height:1.5;">
+        Screening is the starting point. Monitor developmental trajectories across 30-day reassessments and support daily routines with visual schedules.
+      </p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:1rem;margin-top:1rem;">
+      <a href="{% if child %}/meltdown/{{ child.id }}/active{% else %}/meltdown{% endif %}" style="display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;background:#fff;border:1px solid #fecaca;border-radius:10px;text-decoration:none;color:var(--ink);box-shadow:var(--shadow);transition:all 0.2s ease;">
+        <span style="font-size:1.6rem;">🚨</span>
+        <div>
+          <strong style="display:block;font-size:0.92rem;color:#dc2626;">Meltdown Emergency Suite</strong>
+          <span style="font-size:0.75rem;color:var(--ink-soft);">Active crisis stopwatch & triggers</span>
+        </div>
+      </a>
+      <a href="{% if child %}/journey/{{ child.id }}{% else %}/journey{% endif %}" style="display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;background:#fff;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--ink);box-shadow:var(--shadow);transition:all 0.2s ease;">
+        <span style="font-size:1.6rem;">📈</span>
+        <div>
+          <strong style="display:block;font-size:0.92rem;color:var(--teal);">My Child's Journey</strong>
+          <span style="font-size:0.75rem;color:var(--ink-soft);">Longitudinal trajectory & risk delta</span>
+        </div>
+      </a>
+      <a href="{% if child %}/schedule/{{ child.id }}{% else %}/schedule{% endif %}" style="display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;background:#fff;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--ink);box-shadow:var(--shadow);transition:all 0.2s ease;">
+        <span style="font-size:1.6rem;">📅</span>
+        <div>
+          <strong style="display:block;font-size:0.92rem;color:var(--teal);">Visual Daily Routine</strong>
+          <span style="font-size:0.75rem;color:var(--ink-soft);">Routines, rewards & streak tracking</span>
+        </div>
+      </a>
+      {% if child %}
+      <a href="/api/v1/journey/{{ child.id }}/report.pdf" target="_blank" style="display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;background:#fff;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--ink);box-shadow:var(--shadow);transition:all 0.2s ease;">
+        <span style="font-size:1.6rem;">📄</span>
+        <div>
+          <strong style="display:block;font-size:0.92rem;color:var(--danger);">Clinical PDF Summary</strong>
+          <span style="font-size:0.75rem;color:var(--ink-soft);">For pediatrician consults</span>
+        </div>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
   <!-- Model card footer -->
   <div class="model-footer">
     <!--
@@ -576,7 +703,17 @@
 </script>
 
 <script>
+  function toggleMenu() {
+    const toggle = document.getElementById('menuToggle');
+    const actions = document.getElementById('topbarActions');
+    if (toggle && actions) {
+      toggle.classList.toggle('open');
+      actions.classList.toggle('open');
+    }
+  }
+
   async function logout() {
+
     try {
       const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
       if (token) {

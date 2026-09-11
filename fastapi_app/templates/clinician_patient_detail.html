@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ child.first_name }} ? 360? Clinical Profile ? NeuroAdapt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0f1923;
+      --ink-soft:   #445566;
+      --paper:      #f6f8fa;
+      --cream:      #ede9df;
+      --card-bg:    #ffffff;
+      --teal:       #0d7a6e;
+      --teal-lt:    #e0f4f2;
+      --teal-dk:    #0a5f55;
+      --amber:      #d97b00;
+      --amber-lt:   #fff4e0;
+      --danger:     #c0392b;
+      --danger-lt:  #fdecea;
+      --safe:       #1a7a3a;
+      --safe-lt:    #e4f7ea;
+      --border:     #d8d2c5;
+      --border-lt:  #e6edf2;
+      --shadow:     0 4px 20px rgba(15,25,35,0.06);
+      --radius:     12px;
+      --mono:       'DM Mono', monospace;
+      --serif:      'Fraunces', Georgia, serif;
+      --sans:       'Outfit', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink:       #e0eaf4;
+        --ink-soft:  #8fa4b8;
+        --paper:     #0c121c;
+        --cream:     #16202c;
+        --card-bg:   #121b27;
+        --teal:      #3ecfc5;
+        --teal-lt:   #092622;
+        --teal-dk:   #5edfd5;
+        --border:    #223244;
+        --border-lt: #1d2a3a;
+        --shadow:    0 6px 24px rgba(0,0,0,0.45);
+        --danger:    #ff7060;
+        --danger-lt: #2a0a0a;
+        --safe:      #50d878;
+        --safe-lt:   #082010;
+        --amber:     #ffa030;
+        --amber-lt:  #251500;
+      }
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ?? Top Bar ?? */
+    .topbar {
+      background: #0b141f;
+      color: #fff;
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      margin-left: 2rem;
+      gap: 1.5rem;
+    }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 19px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.25s ease-in-out;
+    }
+    .menu-toggle.open .bar:nth-child(1) {
+      transform: translateY(8.5px) rotate(45deg);
+    }
+    .menu-toggle.open .bar:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.open .bar:nth-child(3) {
+      transform: translateY(-8.5px) rotate(-45deg);
+    }
+
+    @media (max-width: 960px) {
+      .menu-toggle {
+        display: flex;
+      }
+      .topbar {
+        padding: 0.8rem 1.25rem;
+        flex-wrap: wrap;
+      }
+      .topbar-actions {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0 !important;
+        padding-top: 1rem;
+        margin-top: 0.6rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 0.85rem;
+      }
+      .topbar-actions.open {
+        display: flex;
+        animation: navDrawerFade 0.2s ease-out;
+      }
+      .topbar-nav {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 0.4rem;
+      }
+      .topbar-nav .nav-link {
+        padding: 0.55rem 0.8rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        text-align: left;
+        display: block;
+      }
+      .user-pill {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+      }
+      @keyframes navDrawerFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .topbar-brand span { color: var(--teal); }
+    .badge-portal {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      background: rgba(62,207,197,0.2);
+      color: #5ecfc5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      letter-spacing: 0.06em;
+      border: 1px solid rgba(62,207,197,0.3);
+    }
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: #fff;
+      background: rgba(255,255,255,0.12);
+    }
+    .nav-link.active {
+      color: var(--teal);
+      border-bottom: 2px solid var(--teal);
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.08);
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-family: var(--mono);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    /* ?? Container ?? */
+    .container {
+      max-width: 1360px;
+      margin: 1.75rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+
+    /* ?? Patient Header Banner ?? */
+    .patient-header {
+      background: var(--card-bg);
+      border: 1px solid var(--border-lt);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+    }
+    .patient-info {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .patient-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--teal-lt);
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      border: 2px solid var(--teal);
+    }
+    .patient-details h1 {
+      font-family: var(--serif);
+      font-size: 1.85rem;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .patient-tags {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      background: var(--cream);
+      color: var(--ink-soft);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .btn-outline {
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--ink);
+      padding: 0.5rem 0.9rem;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+    .btn-primary {
+      background: var(--teal);
+      border: 1px solid var(--teal);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: 0.85rem;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--teal-dk); }
+
+    /* ?? 3-Column Grid ?? */
+    .clinical-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr 380px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 1200px) {
+      .clinical-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-lt);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      padding: 1rem 1.25rem;
+      background: rgba(0,0,0,0.02);
+      border-bottom: 1px solid var(--border-lt);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-header h3 {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .panel-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-urgent { background: var(--danger-lt); color: var(--danger); border: 1px solid var(--danger); }
+    .badge-monitor { background: var(--amber-lt); color: var(--amber); border: 1px solid var(--amber); }
+    .badge-stable { background: var(--safe-lt); color: var(--safe); border: 1px solid var(--safe); }
+    .badge-tier { background: rgba(13,122,110,0.12); color: var(--teal); border: 1px solid var(--teal); font-weight: 600; }
+
+    /* Trajectory section */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed var(--border-lt);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { font-size: 0.85rem; color: var(--ink-soft); }
+    .stat-val { font-family: var(--mono); font-weight: 600; font-size: 0.95rem; }
+
+    .flag-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .flag-heading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+    }
+    .flag-pill {
+      font-size: 0.78rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 0.15rem;
+    }
+    .flag-resolved { background: var(--safe-lt); color: var(--safe); border: 1px solid var(--safe); }
+    .flag-focus { background: var(--danger-lt); color: var(--danger); border: 1px solid var(--danger); }
+
+    /* Notes section */
+    .note-item {
+      border: 1px solid var(--border-lt);
+      border-radius: 8px;
+      padding: 1rem;
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .note-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+    }
+    .note-text {
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: var(--ink);
+      white-space: pre-wrap;
+    }
+
+    /* Note Composer Form */
+    .composer-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      background: var(--card-bg);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .composer-card textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 0.75rem;
+      border: 1px solid var(--border-lt);
+      border-radius: 6px;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
+      resize: vertical;
+    }
+    .composer-card textarea:focus { border-color: var(--teal); }
+
+    /* RAG Drawer */
+    .search-input-wrap {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .search-input-wrap input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-lt);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+    }
+    .chip {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+      background: var(--cream);
+      color: var(--ink);
+      cursor: pointer;
+      border: 1px solid var(--border-lt);
+      transition: background 0.15s;
+    }
+    .chip:hover { background: var(--teal-lt); color: var(--teal); }
+
+    .evidence-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      max-height: 650px;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+    .evidence-card {
+      border: 1px solid var(--border-lt);
+      border-radius: 8px;
+      padding: 0.85rem;
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      transition: border-color 0.2s;
+    }
+    .evidence-card:hover {
+      border-color: var(--teal);
+    }
+    .ev-title {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--ink);
+    }
+    .ev-summary {
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      line-height: 1.35;
+    }
+    .ev-outcomes {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      color: var(--teal-dk);
+      background: var(--teal-lt);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+    .ev-citation {
+      font-size: 0.7rem;
+      color: var(--ink-soft);
+      font-style: italic;
+    }
+    .btn-cite {
+      align-self: flex-start;
+      background: transparent;
+      border: 1px solid var(--teal);
+      color: var(--teal);
+      font-size: 0.72rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.2rem;
+    }
+    .btn-cite:hover {
+      background: var(--teal);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <a href="/clinician/dashboard" class="topbar-brand">
+        Neuro<span>Adapt</span>
+      </a>
+      <span class="badge-portal">Clinical Portal</span>
+    </div>
+
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <div class="topbar-actions" id="topbarActions">
+      <nav class="topbar-nav">
+        <a href="/clinician/dashboard" class="nav-link">&larr; Caseload Roster</a>
+        <a href="/evidence" class="nav-link">Evidence Library</a>
+        <a href="/" class="nav-link">Screening View</a>
+        <a href="/logout" class="nav-link">Sign Out</a>
+      </nav>
+
+      <div class="user-pill">
+        <span>🩺</span>
+        <span>Dr. {{ user.username }}</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Patient Header Banner -->
+    <section class="patient-header">
+      <div class="patient-info">
+        <div class="patient-avatar">{{ child.first_name[:1] }}</div>
+        <div class="patient-details">
+          <h1>{{ child.first_name }}</h1>
+          <div class="patient-tags">
+            <span class="tag">?? DOB: {{ child.date_of_birth }}</span>
+            <span class="tag">?? Sex: {{ "Male" if child.biological_sex == 1 else "Female" }}</span>
+            <span class="tag">?? Caregiver: {{ parent.username }} ({{ parent.email }})</span>
+            <span class="tag">?? {{ child.id|string|truncate(12, True, '') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="/journey/{{ child.id }}" class="btn-outline" target="_blank">
+          <span>??</span> Journey Timeline
+        </a>
+        <a href="/meltdown/{{ child.id }}/analytics" class="btn-outline" target="_blank">
+          <span>?</span> Meltdown Analytics
+        </a>
+        <a href="/api/v1/journey/{{ child.id }}/report.pdf" class="btn-primary" target="_blank">
+          <span>??</span> Print Clinical PDF
+        </a>
+      </div>
+    </section>
+
+    <!-- 3-Column Layout -->
+    <div class="clinical-grid">
+
+      <!-- Column 1: Longitudinal Trajectory & Sensory Volatility -->
+      <section class="panel-card" id="trajectoryPanel">
+        <div class="panel-header">
+          <h3>Longitudinal Trajectory</h3>
+          <span class="badge {% if trajectory.trend_direction == 'improving' %}badge-stable{% elif trajectory.trend_direction == 'concerning' %}badge-urgent{% else %}badge-monitor{% endif %}">
+            {{ trajectory.trend_direction|capitalize }}
+          </span>
+        </div>
+
+        <div class="panel-body">
+          <div class="stat-row">
+            <span class="stat-label">Current ASD Risk</span>
+            <span class="stat-val" style="color:{% if trajectory.current_risk and trajectory.current_risk >= 40.0 %}var(--danger){% else %}var(--safe){% endif %};">
+              {{ trajectory.current_risk or "--" }}%
+            </span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Velocity Shift (&Delta;Risk)</span>
+            <span class="stat-val">
+              {% if trajectory.risk_delta is not none %}{% if trajectory.risk_delta > 0 %}+{% endif %}{{ trajectory.risk_delta }}%{% else %}Baseline{% endif %}
+            </span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Total Screenings</span>
+            <span class="stat-val">{{ trajectory.total_assessments }} evaluations</span>
+          </div>
+
+          <!-- Milestones Transition Shifts -->
+          <div class="flag-group" style="margin-top:0.5rem;">
+            <span class="flag-heading">Milestone Developmental Shifts:</span>
+            <div>
+              {% if trajectory.milestone_shifts %}
+                {% for m in trajectory.milestone_shifts %}
+                  {% if m.status == 'Resolved' %}
+                    <span class="flag-pill flag-resolved">&check; {{ m.code }}: {{ m.label }} (Resolved)</span>
+                  {% elif m.status == 'Ongoing Focus Area' %}
+                    <span class="flag-pill flag-focus">&bull; {{ m.code }}: {{ m.label }}</span>
+                  {% elif m.status == 'New Flag Identified' %}
+                    <span class="flag-pill flag-focus" style="background:#fff4e0;color:#d97b00;border:1px solid #d97b00;">&#9888; {{ m.code }}: {{ m.label }} (New)</span>
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                <span style="font-size:0.75rem;color:var(--ink-soft);">No milestone shift data recorded yet.</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Meltdown Analytics Summary -->
+          <div style="border-top:1px solid var(--border-lt);padding-top:1rem;margin-top:0.5rem;">
+            <div class="flag-heading" style="margin-bottom:0.5rem;">? Sensory Meltdown Summary</div>
+            <div class="stat-row">
+              <span class="stat-label">30-Day Meltdowns</span>
+              <span class="stat-val">{{ meltdown_analytics.total_incidents }} logged</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Peak Trigger Hour</span>
+              <span class="stat-val">{{ meltdown_analytics.peak_hour_label }}</span>
+            </div>
+            <p style="font-size:0.78rem;color:var(--ink-soft);margin-top:0.5rem;line-height:1.4;">
+              {{ meltdown_analytics.insights[0] if meltdown_analytics.insights else "No sensory crisis episodes logged in current period." }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Column 2: Clinical Consultation Notes -->
+      <section class="panel-card" id="notesPanel">
+        <div class="panel-header">
+          <h3>Consultation & Care Notes</h3>
+          <span style="font-family:var(--mono);font-size:0.75rem;color:var(--ink-soft);" id="notesCount">
+            {{ notes|length }} entries
+          </span>
+        </div>
+
+        <div class="panel-body">
+          <!-- Log Note Form -->
+          <form class="composer-card" id="noteComposerForm" onsubmit="handlePostNote(event)">
+            <div style="display:flex;gap:0.75rem;align-items:center;">
+              <select id="noteTypeSelect" style="padding:0.4rem 0.6rem;font-size:0.8rem;border:1px solid var(--border);border-radius:4px;">
+                <option value="consultation">Consultation Note</option>
+                <option value="recommendation">Clinical Recommendation</option>
+                <option value="assessment">Diagnostic Assessment</option>
+                <option value="follow_up">Follow-up Plan</option>
+              </select>
+              <span style="font-size:0.75rem;color:var(--ink-soft);">Author: Dr. {{ user.username }}</span>
+            </div>
+            <textarea id="noteContent" placeholder="Enter clinical assessment, digital therapeutics endorsement, or caregiver instructions..." required></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:0.72rem;color:var(--teal);cursor:pointer;" onclick="document.getElementById('evidenceSearchInput').focus()">
+                ?? Tip: Click 'Cite in Note' in RAG Explorer to embed trial evidence
+              </span>
+              <button type="submit" class="btn-primary" style="padding:0.4rem 0.85rem;" id="btnSubmitNote">
+                Log Note &rarr;
+              </button>
+            </div>
+          </form>
+
+          <!-- Chronological Notes List -->
+          <div style="display:flex;flex-direction:column;gap:0.85rem;" id="notesList">
+            {% if not notes %}
+            <p style="text-align:center;font-size:0.85rem;color:var(--ink-soft);padding:1.5rem 0;" id="emptyNotesMsg">
+              No clinical notes recorded yet for this patient.
+            </p>
+            {% else %}
+              {% for n in notes %}
+              <div class="note-item">
+                <div class="note-meta">
+                  <span class="badge {% if n.note_type == 'recommendation' %}badge-tier{% elif n.note_type == 'assessment' %}badge-urgent{% else %}badge-stable{% endif %}">
+                    {{ n.note_type|capitalize }}
+                  </span>
+                  <span>Dr. {{ n.clinician_username }} &bull; {{ n.created_at.strftime("%b %d, %Y") }}</span>
+                </div>
+                <div class="note-text">{{ n.content }}</div>
+              </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <!-- Column 3: Semantic Hybrid RAG Evidence Drawer -->
+      <section class="panel-card" id="evidencePanel">
+        <div class="panel-header">
+          <h3>Evidence RAG Explorer</h3>
+          <a href="/evidence" class="tag" style="text-decoration:none;color:var(--teal);" target="_blank">Full Library &rarr;</a>
+        </div>
+
+        <div class="panel-body">
+          <div class="search-input-wrap">
+            <input type="text" id="evidenceSearchInput" placeholder="Search trials (e.g. AAC, MITA, sensory)..." onkeydown="if(event.key==='Enter') executeEvidenceSearch()" />
+            <button class="btn-primary" style="padding:0.4rem 0.75rem;" onclick="executeEvidenceSearch()">Search</button>
+          </div>
+
+          <div class="quick-chips">
+            <span class="chip" onclick="quickSearch('AAC Speech')">AAC Speech</span>
+            <span class="chip" onclick="quickSearch('Deep Pressure')">Deep Pressure</span>
+            <span class="chip" onclick="quickSearch('Mental Imagery MITA')">MITA Imagery</span>
+            <span class="chip" onclick="quickSearch('Visual Schedules')">Visual Schedules</span>
+            <span class="chip" onclick="quickSearch('Noise Reduction')">Sensory Noise</span>
+          </div>
+
+          <div class="evidence-list" id="evidenceResultsContainer">
+            <!-- Results dynamically rendered or populated with initial items -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    const CHILD_ID = "{{ child.id }}";
+
+    // Load initial evidence items
+    window.addEventListener("DOMContentLoaded", () => {
+      executeEvidenceSearch("");
+    });
+
+    function toggleMenu() {
+      const toggle = document.getElementById('menuToggle');
+      const actions = document.getElementById('topbarActions');
+      if (toggle && actions) {
+        toggle.classList.toggle('open');
+        actions.classList.toggle('open');
+      }
+    }
+
+    async function executeEvidenceSearch(queryOverride) {
+
+      const input = document.getElementById("evidenceSearchInput");
+      const query = queryOverride !== undefined ? queryOverride : input.value.trim();
+      const container = document.getElementById("evidenceResultsContainer");
+
+      try {
+        const resp = await fetch(`/api/v1/evidence/search?q=${encodeURIComponent(query)}&top_k=5`);
+        const data = await resp.json();
+        
+        container.innerHTML = "";
+        if (!data.results || data.results.length === 0) {
+          container.innerHTML = `<p style="font-size:0.8rem;color:var(--ink-soft);padding:1rem;">No clinical trials matched your search.</p>`;
+          return;
+        }
+
+        data.results.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "evidence-card";
+          card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+              <span class="ev-title">${item.intervention_name}</span>
+              <span class="badge badge-tier">${item.evidence_tier.split(':')[0]}</span>
+            </div>
+            <p class="ev-summary">${item.clinical_summary}</p>
+            <div class="ev-outcomes">&bull; Outcomes: ${item.primary_outcomes}</div>
+            <div class="ev-citation">&copy; ${item.study_citation} (N=${item.sample_size || 'N/A'})</div>
+            <button class="btn-cite" onclick="citeInNote('${item.intervention_name}', '${item.evidence_tier}', '${item.study_citation}')">
+              &plus; Cite in Note
+            </button>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        container.innerHTML = `<p style="font-size:0.8rem;color:var(--danger);">Error searching evidence: ${err.message}</p>`;
+      }
+    }
+
+    function quickSearch(term) {
+      document.getElementById("evidenceSearchInput").value = term;
+      executeEvidenceSearch(term);
+    }
+
+    function citeInNote(name, tier, citation) {
+      const textarea = document.getElementById("noteContent");
+      const citationText = `\n\n[Clinical Evidence Endorsement: ${name} (${tier}). Citation: ${citation}]`;
+      textarea.value = (textarea.value + citationText).trim();
+      textarea.focus();
+    }
+
+    async function handlePostNote(e) {
+      e.preventDefault();
+      const noteType = document.getElementById("noteTypeSelect").value;
+      const content = document.getElementById("noteContent").value.trim();
+      if (!content) return;
+
+      try {
+        const resp = await fetch(`/api/v1/clinician/patients/${CHILD_ID}/notes`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ note_type: noteType, content: content })
+        });
+        const note = await resp.json();
+        if (!resp.ok) {
+          alert("Error: " + (note.detail || "Could not log note"));
+          return;
+        }
+
+        // Prepend to notes list
+        const list = document.getElementById("notesList");
+        const emptyMsg = document.getElementById("emptyNotesMsg");
+        if (emptyMsg) emptyMsg.remove();
+
+        const noteDiv = document.createElement("div");
+        noteDiv.className = "note-item";
+        noteDiv.innerHTML = `
+          <div class="note-meta">
+            <span class="badge badge-tier">${note.note_type.toUpperCase()}</span>
+            <span>Dr. ${note.clinician_username} &bull; Just now</span>
+          </div>
+          <div class="note-text">${note.content}</div>
+        `;
+        list.prepend(noteDiv);
+
+        document.getElementById("noteContent").value = "";
+      } catch (err) {
+        alert("Network error logging note: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

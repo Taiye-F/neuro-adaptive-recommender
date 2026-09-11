@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clinician Caseload Roster ? NeuroAdapt Clinical Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0f1923;
+      --ink-soft:   #445566;
+      --paper:      #f6f8fa;
+      --cream:      #ede9df;
+      --card-bg:    #ffffff;
+      --teal:       #0d7a6e;
+      --teal-lt:    #e0f4f2;
+      --teal-dk:    #0a5f55;
+      --amber:      #d97b00;
+      --amber-lt:   #fff4e0;
+      --danger:     #c0392b;
+      --danger-lt:  #fdecea;
+      --safe:       #1a7a3a;
+      --safe-lt:    #e4f7ea;
+      --border:     #d8d2c5;
+      --border-lt:  #e6edf2;
+      --shadow:     0 4px 20px rgba(15,25,35,0.06);
+      --radius:     12px;
+      --mono:       'DM Mono', monospace;
+      --serif:      'Fraunces', Georgia, serif;
+      --sans:       'Outfit', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink:       #e0eaf4;
+        --ink-soft:  #8fa4b8;
+        --paper:     #0c121c;
+        --cream:     #16202c;
+        --card-bg:   #121b27;
+        --teal:      #3ecfc5;
+        --teal-lt:   #092622;
+        --teal-dk:   #5edfd5;
+        --border:    #223244;
+        --border-lt: #1d2a3a;
+        --shadow:    0 6px 24px rgba(0,0,0,0.45);
+        --danger:    #ff7060;
+        --danger-lt: #2a0a0a;
+        --safe:      #50d878;
+        --safe-lt:   #082010;
+        --amber:     #ffa030;
+        --amber-lt:  #251500;
+      }
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ?? Top Bar ?? */
+    .topbar {
+      background: #0b141f;
+      color: #fff;
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      margin-left: 2rem;
+      gap: 1.5rem;
+    }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 19px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.25s ease-in-out;
+    }
+    .menu-toggle.open .bar:nth-child(1) {
+      transform: translateY(8.5px) rotate(45deg);
+    }
+    .menu-toggle.open .bar:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.open .bar:nth-child(3) {
+      transform: translateY(-8.5px) rotate(-45deg);
+    }
+
+    @media (max-width: 960px) {
+      .menu-toggle {
+        display: flex;
+      }
+      .topbar {
+        padding: 0.8rem 1.25rem;
+        flex-wrap: wrap;
+      }
+      .topbar-actions {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0 !important;
+        padding-top: 1rem;
+        margin-top: 0.6rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 0.85rem;
+      }
+      .topbar-actions.open {
+        display: flex;
+        animation: navDrawerFade 0.2s ease-out;
+      }
+      .topbar-nav {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 0.4rem;
+      }
+      .topbar-nav .nav-link {
+        padding: 0.55rem 0.8rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        text-align: left;
+        display: block;
+      }
+      .user-pill {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+      }
+      @keyframes navDrawerFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .topbar-brand span { color: var(--teal); }
+    .badge-portal {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      background: rgba(62,207,197,0.2);
+      color: #5ecfc5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      letter-spacing: 0.06em;
+      border: 1px solid rgba(62,207,197,0.3);
+    }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: #fff;
+      background: rgba(255,255,255,0.12);
+    }
+    .nav-link.active {
+      color: var(--teal);
+      border-bottom: 2px solid var(--teal);
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.08);
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-family: var(--mono);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    /* ?? Main Layout ?? */
+    .container {
+      max-width: 1240px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+    }
+    .page-title {
+      font-family: var(--serif);
+      font-size: 2.1rem;
+      font-weight: 300;
+    }
+    .page-title em { color: var(--teal); font-style: italic; font-weight: 400; }
+    .page-subtitle {
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      margin-top: 0.3rem;
+    }
+
+    /* ?? Metrics Cards Grid ?? */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-lt);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .metric-card.card-all::before { background: var(--ink-soft); }
+    .metric-card.card-urgent::before { background: var(--danger); }
+    .metric-card.card-monitor::before { background: var(--amber); }
+    .metric-card.card-stable::before { background: var(--safe); }
+
+    .metric-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+    }
+    .metric-val {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .metric-desc {
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+    }
+
+    /* ?? Toolbar ?? */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      background: var(--card-bg);
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border-lt);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid var(--border-lt);
+      border-radius: 6px;
+      padding: 0.4rem 0.85rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      background: var(--cream);
+      color: var(--ink);
+    }
+    .tab-btn.active {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--paper);
+      border: 1px solid var(--border-lt);
+      border-radius: 6px;
+      padding: 0.4rem 0.85rem;
+      min-width: 260px;
+    }
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      color: var(--ink);
+      width: 100%;
+    }
+
+    .btn-action {
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+    .btn-action:hover { background: var(--teal-dk); }
+
+    /* ?? Caseload Table ?? */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-lt);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .roster-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .roster-table th {
+      background: rgba(0,0,0,0.02);
+      padding: 0.85rem 1.15rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+      border-bottom: 1px solid var(--border-lt);
+    }
+    .roster-table td {
+      padding: 1rem 1.15rem;
+      font-size: 0.88rem;
+      border-bottom: 1px solid var(--border-lt);
+      vertical-align: middle;
+    }
+    .roster-table tbody tr:hover {
+      background: rgba(13,122,110,0.03);
+    }
+    .roster-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .patient-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .patient-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--ink);
+    }
+    .patient-meta {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-urgent {
+      background: var(--danger-lt);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    .badge-monitor {
+      background: var(--amber-lt);
+      color: var(--amber);
+      border: 1px solid var(--amber);
+    }
+    .badge-stable {
+      background: var(--safe-lt);
+      color: var(--safe);
+      border: 1px solid var(--safe);
+    }
+
+    .badge-risk-high { background: var(--danger-lt); color: var(--danger); font-weight: 600; }
+    .badge-risk-low  { background: var(--safe-lt); color: var(--safe); font-weight: 600; }
+    .badge-risk-none { background: var(--cream); color: var(--ink-soft); }
+
+    .trend-concerning { color: var(--danger); font-weight: 600; font-family: var(--mono); font-size: 0.8rem; }
+    .trend-improving  { color: var(--safe); font-weight: 600; font-family: var(--mono); font-size: 0.8rem; }
+    .trend-stable     { color: var(--ink-soft); font-family: var(--mono); font-size: 0.8rem; }
+
+    .reasons-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-top: 0.3rem;
+    }
+    .reason-pill {
+      font-size: 0.68rem;
+      background: var(--cream);
+      color: var(--ink-soft);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-family: var(--sans);
+    }
+
+    .btn-table-action {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--teal);
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--teal);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-table-action:hover {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    /* ?? Modal ?? */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+    @keyframes modalSlide {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      background: var(--ink);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      font-weight: 400;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.7);
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+    .modal-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.15rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-group label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .form-group select, .form-group input {
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
+    }
+    .form-group select:focus, .form-group input:focus {
+      border-color: var(--teal);
+    }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      background: var(--paper);
+      border-top: 1px solid var(--border-lt);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--ink-soft);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <a href="/clinician/dashboard" class="topbar-brand">
+        Neuro<span>Adapt</span>
+      </a>
+      <span class="badge-portal">Clinical Portal</span>
+    </div>
+
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <div class="topbar-actions" id="topbarActions">
+      <nav class="topbar-nav">
+        <a href="/clinician/dashboard" class="nav-link active" id="navCaseload">Caseload Roster</a>
+        <a href="/evidence" class="nav-link" id="navEvidence">Evidence Library</a>
+        <a href="/" class="nav-link" id="navScreening">Parent Screening View</a>
+        <a href="/logout" class="nav-link" id="navLogout">Sign Out</a>
+      </nav>
+
+      <div class="user-pill">
+        <span>🩺</span>
+        <span>Dr. {{ user.username }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Caseload <em>Triage Roster</em></h1>
+        <p class="page-subtitle">Multi-patient longitudinal surveillance, risk velocity, and sensory analytics</p>
+      </div>
+      <div>
+        <button class="btn-action" id="btnOpenAssignModal" onclick="openAssignModal()">
+          <span>+</span> Assign Patient to Caseload
+        </button>
+      </div>
+    </div>
+
+    <!-- Metrics Cards Grid -->
+    <section class="metrics-grid" id="metricsSummary">
+      <div class="metric-card card-all">
+        <span class="metric-label">Active Caseload</span>
+        <div class="metric-val" id="totalPatientsVal">{{ total_patients }}</div>
+        <span class="metric-desc">Registered pediatric patients</span>
+      </div>
+
+      <div class="metric-card card-urgent">
+        <span class="metric-label">?? Urgent Triage</span>
+        <div class="metric-val" id="urgentCountVal" style="color:var(--danger);">{{ urgent_count }}</div>
+        <span class="metric-desc">High risk, delta escalation, or ?3 meltdowns</span>
+      </div>
+
+      <div class="metric-card card-monitor">
+        <span class="metric-label">?? Active Monitor</span>
+        <div class="metric-val" id="monitorCountVal" style="color:var(--amber);">{{ monitor_count }}</div>
+        <span class="metric-desc">Moderate risk or sensory episodes</span>
+      </div>
+
+      <div class="metric-card card-stable">
+        <span class="metric-label">?? Stable Development</span>
+        <div class="metric-val" id="stableCountVal" style="color:var(--safe);">{{ stable_count }}</div>
+        <span class="metric-desc">Low risk with consistent trajectory</span>
+      </div>
+    </section>
+
+    <!-- Toolbar: Search & Triage Filters -->
+    <div class="toolbar">
+      <div class="filter-tabs" id="triageFilters">
+        <button class="tab-btn active" data-filter="all" onclick="setFilter('all', this)">All ({{ total_patients }})</button>
+        <button class="tab-btn" data-filter="urgent" onclick="setFilter('urgent', this)">?? Urgent ({{ urgent_count }})</button>
+        <button class="tab-btn" data-filter="monitor" onclick="setFilter('monitor', this)">?? Monitor ({{ monitor_count }})</button>
+        <button class="tab-btn" data-filter="stable" onclick="setFilter('stable', this)">?? Stable ({{ stable_count }})</button>
+      </div>
+
+      <div class="search-box">
+        <span>??</span>
+        <input type="text" id="patientSearchInput" placeholder="Search patient or caregiver..." oninput="filterPatients()" />
+      </div>
+    </div>
+
+    <!-- Caseload Table -->
+    <div class="table-card">
+      <table class="roster-table" id="caseloadTable">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Caregiver</th>
+            <th>Latest ASD Risk</th>
+            <th>Trajectory Shift</th>
+            <th>Meltdowns (30d)</th>
+            <th>Triage Priority</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rosterTableBody">
+          {% if not roster %}
+          <tr>
+            <td colspan="7" style="text-align:center;padding:3rem;color:var(--ink-soft);">
+              No patient profiles found in caseload roster. Click <strong>"Assign Patient to Caseload"</strong> to begin.
+            </td>
+          </tr>
+          {% else %}
+            {% for p in roster %}
+            <tr class="patient-row" data-priority="{{ p.triage_priority }}" data-name="{{ p.child_name | lower }}" data-parent="{{ p.parent_name | lower }}">
+              <td>
+                <div class="patient-cell">
+                  <span class="patient-name">{{ p.child_name }}</span>
+                  <span class="patient-meta">
+                    {{ p.age_months }} mos &bull; {{ "Male" if p.biological_sex == 1 else "Female" }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="patient-cell">
+                  <span>{{ p.parent_name }}</span>
+                </div>
+              </td>
+              <td>
+                {% if p.latest_risk is not none %}
+                  <span class="badge {% if p.latest_risk >= 40.0 %}badge-risk-high{% else %}badge-risk-low{% endif %}">
+                    {{ p.latest_risk }}% ({{ p.risk_level }})
+                  </span>
+                  {% if p.days_since_last_screening is not none %}
+                    <div class="patient-meta" style="margin-top:0.2rem;">{{ p.days_since_last_screening }}d ago</div>
+                  {% endif %}
+                {% else %}
+                  <span class="badge badge-risk-none">Unscreened</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if p.trajectory_trend == "concerning" %}
+                  <span class="trend-concerning">? +{{ p.trajectory_delta }}% (Concerning)</span>
+                {% elif p.trajectory_trend == "improving" %}
+                  <span class="trend-improving">? {{ p.trajectory_delta }}% (Improving)</span>
+                {% else %}
+                  <span class="trend-stable">&sim; Stable (0%)</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge {% if p.total_meltdowns >= 3 %}badge-urgent{% elif p.total_meltdowns >= 1 %}badge-monitor{% else %}badge-stable{% endif %}">
+                  ? {{ p.total_meltdowns }} logged
+                </span>
+              </td>
+              <td>
+                <div style="display:flex;flex-direction:column;gap:0.2rem;">
+                  <span class="badge badge-{{ p.triage_priority }}">
+                    {% if p.triage_priority == "urgent" %}?? URGENT
+                    {% elif p.triage_priority == "monitor" %}?? MONITOR
+                    {% else %}?? STABLE{% endif %}
+                  </span>
+                  <div class="reasons-list">
+                    {% for r in p.triage_reasons %}
+                    <span class="reason-pill">{{ r }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              </td>
+              <td style="text-align:right;">
+                <a href="/clinician/patients/{{ p.child_id }}" class="btn-table-action" id="viewPatient_{{ p.child_id }}">
+                  360? Profile &rarr;
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Assign Patient Modal -->
+  <div class="modal-backdrop" id="assignModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Assign Patient to Caseload</h3>
+        <button class="modal-close" onclick="closeAssignModal()">&times;</button>
+      </div>
+      <form id="assignPatientForm" onsubmit="handleAssignPatient(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="childSelect">Select Patient</label>
+            <select id="childSelect" required>
+              <option value="">-- Choose child profile --</option>
+              {% for c in all_children %}
+              <option value="{{ c.id }}">{{ c.first_name }} (ID: {{ c.id|string|truncate(8, True, '') }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="accessLevel">Clinical Access Level</label>
+            <select id="accessLevel">
+              <option value="full_clinical">Full Clinical Care & Prescribing</option>
+              <option value="consulting">Consulting / Second Opinion</option>
+              <option value="read_only">Read-Only Diagnostic Review</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeAssignModal()">Cancel</button>
+          <button type="submit" class="btn-action" id="btnSubmitAssign">Assign Patient</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentFilter = 'all';
+
+    function setFilter(filterVal, btn) {
+      currentFilter = filterVal;
+      document.querySelectorAll('#triageFilters .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterPatients();
+    }
+
+    function toggleMenu() {
+      const toggle = document.getElementById('menuToggle');
+      const actions = document.getElementById('topbarActions');
+      if (toggle && actions) {
+        toggle.classList.toggle('open');
+        actions.classList.toggle('open');
+      }
+    }
+
+    function filterPatients() {
+
+      const q = document.getElementById('patientSearchInput').value.toLowerCase().trim();
+      const rows = document.querySelectorAll('#rosterTableBody .patient-row');
+
+      rows.forEach(row => {
+        const priority = row.getAttribute('data-priority');
+        const name = row.getAttribute('data-name') || '';
+        const parent = row.getAttribute('data-parent') || '';
+
+        const matchesFilter = (currentFilter === 'all' || priority === currentFilter);
+        const matchesSearch = (!q || name.includes(q) || parent.includes(q));
+
+        if (matchesFilter && matchesSearch) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    function openAssignModal() {
+      document.getElementById('assignModal').style.display = 'flex';
+    }
+    function closeAssignModal() {
+      document.getElementById('assignModal').style.display = 'none';
+    }
+
+    async function handleAssignPatient(e) {
+      e.preventDefault();
+      const childId = document.getElementById('childSelect').value;
+      const accessLevel = document.getElementById('accessLevel').value;
+      if (!childId) return;
+
+      try {
+        const resp = await fetch('/api/v1/clinician/patients/assign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ child_id: childId, access_level: accessLevel })
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          alert('Error: ' + (data.detail || 'Could not assign patient'));
+          return;
+        }
+        alert('Patient assigned successfully!');
+        window.location.reload();
+      } catch (err) {
+        alert('Network error assigning patient: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Clinical Pediatric Summary — {{ child.first_name }}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 1.8cm 1.5cm;
+      @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        font-size: 8pt;
+        color: #718096;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      color: #1a202c;
+      background: #fff;
+      font-size: 9.5pt;
+      line-height: 1.45;
+    }
+
+    .report-header {
+      border-bottom: 2pt solid #0d7a6e;
+      padding-bottom: 12pt;
+      margin-bottom: 16pt;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .brand-title {
+      font-size: 18pt;
+      font-weight: 700;
+      color: #0d7a6e;
+      letter-spacing: -0.5pt;
+    }
+
+    .brand-sub {
+      font-size: 8.5pt;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 1pt;
+      margin-top: 2pt;
+    }
+
+    .doc-meta {
+      text-align: right;
+      font-size: 8pt;
+      color: #718096;
+    }
+
+    .patient-grid {
+      display: table;
+      width: 100%;
+      background: #f7fafc;
+      border: 1pt solid #e2e8f0;
+      border-radius: 6pt;
+      padding: 10pt;
+      margin-bottom: 16pt;
+    }
+
+    .patient-row {
+      display: table-row;
+    }
+
+    .patient-cell {
+      display: table-cell;
+      padding: 4pt 8pt;
+      width: 25%;
+    }
+
+    .cell-lbl {
+      font-size: 7.5pt;
+      text-transform: uppercase;
+      color: #718096;
+      font-weight: 600;
+    }
+
+    .cell-val {
+      font-size: 10pt;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .section-title {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #0d7a6e;
+      border-bottom: 1pt solid #cbd5e0;
+      padding-bottom: 3pt;
+      margin-top: 14pt;
+      margin-bottom: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5pt;
+    }
+
+    .trajectory-summary-box {
+      border: 1pt solid #cbd5e0;
+      border-radius: 6pt;
+      padding: 10pt;
+      margin-bottom: 12pt;
+      background: #fff;
+    }
+
+    .stat-row {
+      display: table;
+      width: 100%;
+      margin-bottom: 6pt;
+    }
+
+    .stat-col {
+      display: table-cell;
+      width: 33.3%;
+      text-align: center;
+      border-right: 1pt solid #e2e8f0;
+      padding: 4pt;
+    }
+
+    .stat-col:last-child { border-right: none; }
+
+    .stat-num {
+      font-size: 16pt;
+      font-weight: 700;
+    }
+
+    .stat-num.improving { color: #2b6cb0; }
+    .stat-num.high { color: #c53030; }
+    .stat-num.low { color: #2f855a; }
+
+    .stat-lbl {
+      font-size: 7.5pt;
+      color: #718096;
+      text-transform: uppercase;
+    }
+
+    .narrative-text {
+      font-size: 9pt;
+      color: #4a5568;
+      font-style: italic;
+      padding: 6pt 8pt;
+      background: #edf2f7;
+      border-radius: 4pt;
+      margin-top: 6pt;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12pt;
+      font-size: 8.5pt;
+    }
+
+    table.data-table th, table.data-table td {
+      border: 1pt solid #e2e8f0;
+      padding: 5pt 7pt;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: #f7fafc;
+      font-weight: 600;
+      color: #4a5568;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2pt 5pt;
+      border-radius: 3pt;
+      font-size: 7.5pt;
+      font-weight: 600;
+    }
+
+    .badge-resolved { background: #c6f6d5; color: #22543d; }
+    .badge-ongoing { background: #feebc8; color: #744210; }
+    .badge-new { background: #fed7d7; color: #742a2a; }
+    .badge-typical { background: #edf2f7; color: #4a5568; }
+
+    .disclaimer {
+      font-size: 7.5pt;
+      color: #718096;
+      margin-top: 16pt;
+      padding-top: 8pt;
+      border-top: 1pt solid #e2e8f0;
+    }
+
+    .signature-area {
+      margin-top: 24pt;
+      display: table;
+      width: 100%;
+    }
+
+    .sig-block {
+      display: table-cell;
+      width: 50%;
+      vertical-align: top;
+      padding-right: 15pt;
+    }
+
+    .sig-line {
+      margin-top: 30pt;
+      border-bottom: 1pt solid #4a5568;
+      width: 80%;
+    }
+
+    .sig-title {
+      font-size: 8pt;
+      color: #718096;
+      margin-top: 4pt;
+    }
+
+    @media print {
+      body { margin: 0; padding: 0; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Print action button for web browser view -->
+  <div class="no-print" style="background:#0d7a6e;color:#fff;padding:10px 20px;text-align:right;margin-bottom:20px;">
+    <button onclick="window.print()" style="background:#fff;color:#0d7a6e;border:none;padding:6px 16px;font-weight:bold;border-radius:4px;cursor:pointer;">
+      🖨️ Print or Save as PDF
+    </button>
+  </div>
+
+  <div class="report-header">
+    <div>
+      <div class="brand-title">Neuro-Adaptive Pediatric ASD Summary</div>
+      <div class="brand-sub">Clinical Developmental Monitoring Report</div>
+    </div>
+    <div class="doc-meta">
+      Report Date: <strong>{{ generated_at }}</strong><br />
+      Instrument: Validated Q-CHAT-10 Toddler Checklist
+    </div>
+  </div>
+
+  <!-- Demographics -->
+  <div class="patient-grid">
+    <div class="patient-row">
+      <div class="patient-cell">
+        <div class="cell-lbl">Child Name</div>
+        <div class="cell-val">{{ child.first_name }}</div>
+      </div>
+      <div class="patient-cell">
+        <div class="cell-lbl">Age at Screening</div>
+        <div class="cell-val">{{ latest_assessment.age_months if latest_assessment else child.date_of_birth }} Months</div>
+      </div>
+      <div class="patient-cell">
+        <div class="cell-lbl">Biological Sex</div>
+        <div class="cell-val">{{ "Male" if child.biological_sex == 1 else "Female" }}</div>
+      </div>
+      <div class="patient-cell">
+        <div class="cell-lbl">Primary Caregiver</div>
+        <div class="cell-val">{{ parent_user.username }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trajectory Metrics -->
+  <div class="section-title">Longitudinal Trajectory Summary</div>
+  <div class="trajectory-summary-box">
+    <div class="stat-row">
+      <div class="stat-col">
+        <div class="stat-lbl">Baseline ASD Likelihood</div>
+        <div class="stat-num {{ 'high' if trajectory.baseline_risk and trajectory.baseline_risk >= 40 else 'low' }}">
+          {{ "%.1f"|format(trajectory.baseline_risk) if trajectory.baseline_risk else "N/A" }}%
+        </div>
+      </div>
+      <div class="stat-col">
+        <div class="stat-lbl">Current ASD Likelihood</div>
+        <div class="stat-num {{ 'high' if trajectory.current_risk and trajectory.current_risk >= 40 else 'low' }}">
+          {{ "%.1f"|format(trajectory.current_risk) if trajectory.current_risk else "N/A" }}%
+        </div>
+      </div>
+      <div class="stat-col">
+        <div class="stat-lbl">Risk Delta (Trend)</div>
+        <div class="stat-num improving">
+          {% if trajectory.risk_delta is not none %}
+            {{ "%+.1f"|format(trajectory.risk_delta) }}%
+          {% else %}
+            Baseline
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="narrative-text">
+      {{ trajectory.summary_narrative }}
+    </div>
+  </div>
+
+  <!-- Milestone Progression Matrix -->
+  <div class="section-title">Q-CHAT-10 Milestone Status & Progress Shifts</div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:10%;">Code</th>
+        <th style="width:50%;">Developmental Milestone Description</th>
+        <th style="width:18%;">Latest Observation</th>
+        <th style="width:22%;">Trajectory Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in trajectory.milestone_shifts %}
+      <tr>
+        <td><strong>{{ m.code }}</strong></td>
+        <td>{{ m.label }}</td>
+        <td>
+          {% if m.current_score == 0 %}Always
+          {% elif m.current_score == 1 %}Usually
+          {% elif m.current_score == 2 %}Sometimes
+          {% elif m.current_score == 3 %}Rarely
+          {% else %}Never{% endif %}
+        </td>
+        <td>
+          {% if m.status == 'Resolved' %}
+            <span class="badge badge-resolved">✓ Resolved</span>
+          {% elif m.status == 'Ongoing Focus Area' %}
+            <span class="badge badge-ongoing">⚠ Focus Area</span>
+          {% elif m.status == 'New Flag Identified' %}
+            <span class="badge badge-new">▲ New Flag</span>
+          {% else %}
+            <span class="badge badge-typical">Typical</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Recommended Interventions -->
+  {% if latest_assessment and latest_assessment.recommendations %}
+  <div class="section-title">Evidence-Based Recommendations & Early Interventions</div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:15%;">Type</th>
+        <th style="width:40%;">Title / Resource Name</th>
+        <th style="width:30%;">Category</th>
+        <th style="width:15%;">Relevance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in latest_assessment.recommendations %}
+      <tr>
+        <td><strong>{{ r.resource_type|capitalize }}</strong></td>
+        <td>{{ r.item_name }}</td>
+        <td>{{ r.category or "General Early Support" }}</td>
+        <td>{{ "%.1f"|format(r.match_score) }}% Match</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <!-- Physician Sign-Off -->
+  <div class="signature-area">
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-title">Attending Pediatrician / Clinician Signature</div>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-title">Date & Clinical Notes</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Clinical Notice:</strong> This document reflects caregiver-reported developmental observations scored via machine learning against Q-CHAT-10 pediatric standardization data. It serves as an early behavioral surveillance aid and clinical reference, not a standalone diagnostic evaluation. Always pair with clinical assessment (e.g. ADOS-2 / Bayley Scales).
+  </div>
+
+</body>
+</html>

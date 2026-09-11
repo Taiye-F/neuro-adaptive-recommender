@@ -433,7 +433,7 @@
     }
 
     /* ── Responsive ──────────────────────────────────────────────── */
-    @media (max-width: 768px) {
+    @media (max-width: 960px) {
       .shell { grid-template-columns: 1fr; }
       .sidebar { position: static; height: auto; }
       .main { padding: 2rem 1.25rem; }
@@ -452,27 +452,44 @@
         transform: translateY(-8px) rotate(-45deg);
       }
       .topbar {
-        padding: 0.8rem 1.5rem;
+        padding: 0.8rem 1.25rem;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
       }
       .topbar-actions {
         display: none;
         flex-direction: column;
         width: 100%;
-        gap: 0.75rem;
+        gap: 0.65rem;
         padding-top: 1rem;
-        border-top: 1px solid rgba(255,255,255,0.08);
+        margin-top: 0.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        align-items: stretch;
       }
       .topbar-actions.open {
         display: flex;
+        animation: navDrawerFade 0.2s ease-out;
+      }
+      .topbar-actions a, .topbar-actions button {
+        width: 100%;
+        text-align: left;
+        box-sizing: border-box;
+      }
+      .btn-chat-toggle {
+        justify-content: center;
+        text-align: center;
       }
       .user-chip {
         width: 100%;
         text-align: center;
         margin-right: 0;
         margin-bottom: 0.25rem;
+      }
+      @keyframes navDrawerFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
       }
     }
   </style>
@@ -491,10 +508,31 @@
   
   <div class="topbar-actions" id="topbarActions">
     {% if user %}
-    <span class="user-chip">User: <strong>{{ user.username }}</strong> ({{ user.role }})</span>
+    <span class="user-chip">Parent: <strong>{{ user.username }}</strong></span>
+    
+    <!-- Child Selector -->
+    <div style="display:flex;align-items:center;gap:0.4rem;background:rgba(255,255,255,0.08);padding:0.25rem 0.6rem;border-radius:6px;border:1px solid rgba(255,255,255,0.15);">
+      <span style="font-size:0.75rem;color:#8fa4b8;">Child:</span>
+      <select id="childNavSelect" onchange="onChildChange(this.value)" style="background:#0f1923;color:#fff;border:none;font-family:var(--sans);font-weight:600;font-size:0.8rem;outline:none;cursor:pointer;">
+        {% for c in all_children %}
+          <option value="{{ c.id }}" data-sex="{{ c.biological_sex }}" data-dob="{{ c.date_of_birth }}" {% if active_child and active_child.id == c.id %}selected{% endif %}>
+            {{ c.first_name }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="button" onclick="openNewChildModal()" title="Add Child Profile" style="background:var(--teal);color:#fff;border:none;padding:0.15rem 0.45rem;border-radius:4px;font-size:0.75rem;cursor:pointer;font-weight:700;">+</button>
+    </div>
     {% endif %}
-    <a href="/" style="font-family:var(--mono);font-size:0.74rem;color:#5ecfc5;border:1px solid #5ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Screening</a>
-    <!-- <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a> -->
+
+    <a href="/" style="font-family:var(--mono);font-size:0.74rem;color:#5ecfc5;border:1px solid #5ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;background:rgba(94,207,197,0.12);">Screening</a>
+    <a href="{% if active_child %}/journey/{{ active_child.id }}{% else %}/journey{% endif %}" id="navJourneyLink" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Journey Loop</a>
+    <a href="{% if active_child %}/schedule/{{ active_child.id }}{% else %}/schedule{% endif %}" id="navScheduleLink" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Visual Schedules</a>
+    {% if user and user.role == 'clinician' %}
+    <a href="/clinician/dashboard" style="font-family:var(--mono);font-size:0.74rem;color:#3ecfc5;border:1px solid #3ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Clinician Caseload</a>
+    {% endif %}
+    <a href="/evidence" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Evidence Library</a>
+    <a href="{% if active_child %}/meltdown/{{ active_child.id }}/active{% else %}/meltdown{% endif %}" id="navMeltdownLink" style="font-family:var(--sans);font-weight:700;font-size:0.75rem;color:#fff;background:#c0392b;padding:0.32rem 0.75rem;border-radius:6px;text-decoration:none;display:flex;align-items:center;gap:0.3rem;">🚨 Meltdown Suite</a>
+
     <button class="btn-chat-toggle" onclick="toggleChat()"><span class="dot"></span> Ask Nora AI</button>
     {% if user %}
     <button onclick="logout()" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;background:none;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;margin-left:0.25rem;">Logout</button>
@@ -532,6 +570,18 @@
 
   <!-- ── Main Panel ──────────────────────────────────────────────── -->
   <main class="main">
+    {% if pending_reminders and pending_reminders|length > 0 %}
+    <div style="background:linear-gradient(135deg, rgba(255,160,48,0.15) 0%, rgba(217,123,0,0.2) 100%);border:1px solid rgba(255,160,48,0.4);border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span style="font-size:1.4rem;">⏰</span>
+        <div>
+          <strong style="font-size:0.88rem;color:#ffa030;display:block;">30-Day Developmental Check-in Due</strong>
+          <span style="font-size:0.82rem;color:var(--ink);">{{ pending_reminders[0].message }}</span>
+        </div>
+      </div>
+      <button onclick="dismissReminder('{{ pending_reminders[0].id }}')" style="background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:1.1rem;padding:0.2rem 0.5rem;" title="Dismiss">✕</button>
+    </div>
+    {% endif %}
     <h1 class="page-heading">Toddler ASD <em>Screening</em></h1>
     <p class="page-sub">
       Complete all 12 fields below. The form takes about 2 minutes.
@@ -541,6 +591,7 @@
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
 
     <form method="POST" action="/screen" id="screenForm">
+      <input type="hidden" name="child_id" id="form_child_id" value="{% if active_child %}{{ active_child.id }}{% endif %}">
       <!-- Demographics -->
       <div class="card">
         <div class="card-title">👶 Child Demographics</div>
@@ -699,19 +750,22 @@
 
   async function logout() {
     try {
-      const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
-      if (token) {
-        await fetch('/auth/logout', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-      }
+      await fetch('/auth/logout', { method: 'POST' });
     } catch (e) {
       console.error("Logout API call failed:", e);
     }
-    document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
     window.location.href = "/login";
   }
+
+async function dismissReminder(id) {
+  try {
+    await fetch(`/api/v1/reminders/${id}/dismiss`, { method: 'POST' });
+    window.location.reload();
+  } catch (e) {
+    console.error("Failed to dismiss reminder:", e);
+  }
+}
+
 </script>
 
 <!-- Default context for index page: no screening run yet -->
@@ -731,6 +785,16 @@
 
   };
   const IS_RESULTS_PAGE = false;
+
+async function dismissReminder(id) {
+  try {
+    await fetch(`/api/v1/reminders/${id}/dismiss`, { method: 'POST' });
+    window.location.reload();
+  } catch (e) {
+    console.error("Failed to dismiss reminder:", e);
+  }
+}
+
 </script>
 
 {% set is_results_page = false %}
@@ -742,5 +806,108 @@
 {% include "_chat.html" %}
 {% include "_chat_assets.html" %}
 
+
+<!-- Modal for creating child profile -->
+<div id="newChildModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:2rem;max-width:400px;width:90%;box-shadow:var(--shadow);">
+    <h3 style="font-family:var(--serif);margin-bottom:1rem;color:var(--ink);">Add Child Profile</h3>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <div>
+        <label style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--ink-soft);margin-bottom:0.3rem;">Child's First Name</label>
+        <input type="text" id="modalChildName" placeholder="e.g. Maya" style="width:100%;padding:0.6rem;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:0.9rem;" required>
+      </div>
+      <div>
+        <label style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--ink-soft);margin-bottom:0.3rem;">Date of Birth</label>
+        <input type="date" id="modalChildDob" style="width:100%;padding:0.6rem;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:0.9rem;" required>
+      </div>
+      <div>
+        <label style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--ink-soft);margin-bottom:0.3rem;">Biological Sex</label>
+        <select id="modalChildSex" style="width:100%;padding:0.6rem;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:0.9rem;">
+          <option value="1">Male</option>
+          <option value="0">Female</option>
+        </select>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:0.5rem;">
+        <button type="button" onclick="closeNewChildModal()" style="background:transparent;border:1px solid var(--border);padding:0.5rem 1rem;border-radius:8px;cursor:pointer;font-family:var(--sans);">Cancel</button>
+        <button type="button" onclick="submitNewChild()" style="background:var(--teal);color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-weight:600;font-family:var(--sans);">Save Child</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openNewChildModal() {
+  document.getElementById('newChildModal').style.display = 'flex';
+}
+function closeNewChildModal() {
+  document.getElementById('newChildModal').style.display = 'none';
+}
+async function submitNewChild() {
+  const name = document.getElementById('modalChildName').value.trim();
+  const dob = document.getElementById('modalChildDob').value;
+  const sex = parseInt(document.getElementById('modalChildSex').value, 10);
+  if (!name || !dob) {
+    alert("Please enter the child's name and date of birth.");
+    return;
+  }
+  try {
+    const res = await fetch('/api/v1/children', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ first_name: name, date_of_birth: dob, biological_sex: sex })
+    });
+    if (res.ok) {
+      window.location.reload();
+    } else {
+      const err = await res.json();
+      alert("Failed to save child: " + (err.detail || "Unknown error"));
+    }
+  } catch (e) {
+    alert("Network error creating child profile: " + e.message);
+  }
+}
+function onChildChange(childId) {
+  const hiddenInput = document.getElementById('form_child_id');
+  if (hiddenInput) hiddenInput.value = childId;
+  const jLink = document.getElementById('navJourneyLink');
+  if (jLink) jLink.href = '/journey/' + childId;
+  const sLink = document.getElementById('navScheduleLink');
+  if (sLink) sLink.href = '/schedule/' + childId;
+  const mLink = document.getElementById('navMeltdownLink');
+  if (mLink) mLink.href = '/meltdown/' + childId + '/active';
+  
+  const selectEl = document.getElementById('childNavSelect');
+  const opt = selectEl ? selectEl.options[selectEl.selectedIndex] : null;
+  if (opt) {
+    const sex = opt.getAttribute('data-sex');
+    const dobStr = opt.getAttribute('data-dob');
+    if (sex !== null && sex !== undefined) {
+      const sexInput = document.querySelector('select[name="sex"]');
+      if (sexInput) sexInput.value = sex;
+    }
+    if (dobStr) {
+      const dob = new Date(dobStr);
+      const diffMonths = Math.round((new Date() - dob) / (1000 * 60 * 60 * 24 * 30.44));
+      if (diffMonths >= 12 && diffMonths <= 48) {
+        const ageSlider = document.getElementById('ageSlider');
+        const ageVal = document.getElementById('ageVal');
+        if (ageSlider) ageSlider.value = diffMonths;
+        if (ageVal) ageVal.textContent = diffMonths;
+      }
+    }
+  }
+}
+
+async function dismissReminder(id) {
+  try {
+    await fetch(`/api/v1/reminders/${id}/dismiss`, { method: 'POST' });
+    window.location.reload();
+  } catch (e) {
+    console.error("Failed to dismiss reminder:", e);
+  }
+}
+
+</script>
 </body>
+
 </html>

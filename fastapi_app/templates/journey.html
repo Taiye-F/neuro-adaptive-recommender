@@ -1,0 +1,853 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ child.first_name }}'s Journey Loop — NeuroAdapt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0f1923;
+      --ink-soft:   #445566;
+      --paper:      #f7f4ee;
+      --cream:      #ede9df;
+      --teal:       #0d7a6e;
+      --teal-lt:    #e0f4f2;
+      --teal-dk:    #0a5f55;
+      --amber:      #d97b00;
+      --amber-lt:   #fff4e0;
+      --danger:     #c0392b;
+      --danger-lt:  #fdecea;
+      --safe:       #1a7a3a;
+      --safe-lt:    #e4f7ea;
+      --border:     #d8d2c5;
+      --shadow:     0 4px 20px rgba(15,25,35,0.08);
+      --radius:     14px;
+      --mono:       'DM Mono', monospace;
+      --serif:      'Fraunces', Georgia, serif;
+      --sans:       'Outfit', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink:       #21262b;
+        --ink-soft:  #8fa4b8;
+        --paper:     #0f1520;
+        --cream:     #1a2230;
+        --teal:      #3ecfc5;
+        --teal-lt:   #0a2520;
+        --teal-dk:   #5edfd5;
+        --border:    #2a3848;
+        --shadow:    0 4px 20px rgba(0,0,0,0.4);
+        --danger:    #ff7060;
+        --danger-lt: #2a0808;
+        --safe:      #50d878;
+        --safe-lt:   #082010;
+        --amber:     #ffa030;
+        --amber-lt:  #1a0e00;
+      }
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      background: var(--ink);
+      color: #fff;
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      margin-left: 2rem;
+      gap: 1.5rem;
+    }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 19px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.25s ease-in-out;
+    }
+    .menu-toggle.open .bar:nth-child(1) {
+      transform: translateY(8.5px) rotate(45deg);
+    }
+    .menu-toggle.open .bar:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.open .bar:nth-child(3) {
+      transform: translateY(-8.5px) rotate(-45deg);
+    }
+
+    @media (max-width: 960px) {
+      .menu-toggle {
+        display: flex;
+      }
+      .topbar {
+        padding: 0.8rem 1.25rem;
+        flex-wrap: wrap;
+      }
+      .topbar-actions {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0 !important;
+        padding-top: 1rem;
+        margin-top: 0.6rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 0.85rem;
+      }
+      .topbar-actions.open {
+        display: flex;
+        animation: navDrawerFade 0.2s ease-out;
+      }
+      .topbar-nav {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 0.4rem;
+      }
+      .topbar-nav .nav-link {
+        padding: 0.55rem 0.8rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+      }
+      .topbar-user-area {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 0.6rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed rgba(255,255,255,0.12);
+      }
+      .child-select-wrap {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .child-select {
+        flex: 1;
+        max-width: none;
+      }
+      .btn-add-child, .btn-logout {
+        width: 100%;
+        text-align: center;
+        padding: 0.5rem;
+        display: block;
+        box-sizing: border-box;
+      }
+      @keyframes navDrawerFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .topbar-brand span { color: var(--teal); }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: #fff;
+      background: rgba(255,255,255,0.12);
+    }
+    .nav-link.active {
+      color: var(--teal);
+      border-bottom: 2px solid var(--teal);
+    }
+
+    .child-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.08);
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .child-select {
+      background: transparent;
+      color: #fff;
+      border: none;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .child-select option { background: #0f1923; color: #fff; }
+
+    .btn-add-child {
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ── Main Layout ── */
+    .container {
+      max-width: 1080px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+    }
+    .page-title {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 300;
+    }
+    .page-title em { color: var(--teal); font-style: italic; }
+    .page-sub {
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      margin-top: 0.3rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dk); }
+    .btn-outline { background: transparent; border-color: var(--border); color: var(--ink); }
+    .btn-outline:hover { background: var(--cream); }
+
+    /* ── KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .kpi-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .kpi-lbl {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--ink-soft);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .kpi-val {
+      font-size: 1.9rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .kpi-sub {
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      margin-top: 0.4rem;
+    }
+
+    .val-low { color: var(--safe); }
+    .val-high { color: var(--danger); }
+    .val-imp { color: var(--teal); }
+    .val-neutral { color: var(--ink); }
+
+    /* ── Trajectory SVG Chart ── */
+    .chart-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2.5rem;
+    }
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .chart-title {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      color: var(--ink);
+    }
+    .chart-legend {
+      display: flex;
+      gap: 1.25rem;
+      font-size: 0.8rem;
+      font-family: var(--mono);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .dot-line { width: 14px; height: 3px; border-radius: 2px; }
+
+    .svg-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    /* ── Narrative Callout ── */
+    .narrative-card {
+      background: var(--teal-lt);
+      border-left: 4px solid var(--teal);
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      color: #0d4a43;
+      line-height: 1.5;
+    }
+
+    /* ── Milestones Grid ── */
+    .section-head {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .milestones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .milestone-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s;
+    }
+    .milestone-card:hover { transform: translateY(-2px); }
+    .m-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+    .m-code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: var(--cream);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .m-label {
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-status {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .status-resolved { background: var(--safe-lt); color: var(--safe); }
+    .status-ongoing  { background: var(--amber-lt); color: var(--amber); }
+    .status-new      { background: var(--danger-lt); color: var(--danger); }
+    .status-typical  { background: var(--cream); color: var(--ink-soft); }
+
+    /* ── Assessment History ── */
+    .history-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .h-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .h-date {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .h-risk {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,25,35,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+    .modal-card {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      padding: 1.75rem;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    }
+    .modal-title { font-family: var(--serif); font-size: 1.4rem; margin-bottom: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <a href="/" class="topbar-brand">🧠 Neuro<span>Adapt</span></a>
+    
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <div class="topbar-actions" id="topbarActions">
+      <nav class="topbar-nav">
+        <a href="/" class="nav-link">Screening</a>
+        <a href="/journey/{{ child.id }}" class="nav-link active">Journey Loop</a>
+        <a href="/schedule/{{ child.id }}" class="nav-link">Visual Schedules</a>
+        <a href="/meltdown/{{ child.id }}/active" class="nav-link" style="color:#ff6b6b;font-weight:600;">🚨 Meltdowns</a>
+        <a href="/apps-page" class="nav-link">Apps</a>
+        {% if user and user.role == 'clinician' %}
+        <a href="/clinician/dashboard" class="nav-link">Caseload</a>
+        {% endif %}
+        <a href="/evidence" class="nav-link">Evidence</a>
+      </nav>
+
+      <div class="topbar-user-area" style="display:flex;align-items:center;gap:0.75rem;">
+        <!-- Child Switcher -->
+        <div class="child-select-wrap">
+          <span>👶</span>
+          <select class="child-select" onchange="switchChild(this.value)">
+            {% for c in all_children %}
+            <option value="{{ c.id }}" {% if c.id == child.id %}selected{% endif %}>
+              {{ c.first_name }} ({{ c.age_months }}m)
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button class="btn-add-child" onclick="openAddChildModal()">+ Add Child</button>
+        <a href="/logout" class="btn-logout" style="font-family:var(--mono);font-size:0.75rem;color:#ff6b6b;text-decoration:none;border:1px solid #ff6b6b;padding:0.25rem 0.5rem;border-radius:5px;">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">{{ child.first_name }}'s <em>Developmental Journey</em></h1>
+        <p class="page-sub">
+          Tracking milestone acquisition, risk shift trajectories, and therapeutic outcomes over time.
+        </p>
+      </div>
+      <div class="header-actions">
+        <a href="/api/v1/journey/{{ child.id }}/report.pdf" class="btn-action btn-primary" target="_blank">
+          📄 Download Clinical PDF
+        </a>
+        <a href="/journey/{{ child.id }}/print" class="btn-action btn-outline" target="_blank">
+          🖨️ Print Summary
+        </a>
+        <a href="/?child_id={{ child.id }}" class="btn-action btn-outline">
+          ➕ New Screening
+        </a>
+      </div>
+    </div>
+
+    <!-- KPI Summary Row -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-lbl">Current ASD Likelihood</div>
+        <div class="kpi-val {{ 'val-high' if trajectory.current_risk and trajectory.current_risk >= 40 else 'val-low' }}">
+          {{ "%.1f"|format(trajectory.current_risk) if trajectory.current_risk is not none else "N/A" }}%
+        </div>
+        <div class="kpi-sub">
+          {% if trajectory.current_risk is not none %}
+            {{ "Elevated early traits" if trajectory.current_risk >= 40 else "Low likelihood indicator" }}
+          {% else %}
+            No data yet
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-lbl">Trajectory Delta</div>
+        <div class="kpi-val {{ 'val-imp' if trajectory.trend_direction == 'improving' else ('val-high' if trajectory.trend_direction == 'concerning' else 'val-neutral') }}">
+          {% if trajectory.risk_delta is not none %}
+            {{ "%+.1f"|format(trajectory.risk_delta) }}%
+          {% else %}
+            Baseline
+          {% endif %}
+        </div>
+        <div class="kpi-sub">
+          {% if trajectory.trend_direction == 'improving' %}
+            ⬇ Positive resolution trend
+          {% elif trajectory.trend_direction == 'concerning' %}
+            ⬆ Elevated risk trajectory
+          {% else %}
+            ➔ Stable milestone baseline
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-lbl">Milestones Shift</div>
+        <div class="kpi-val val-imp">
+          {% set resolved_count = trajectory.milestone_shifts | selectattr("status", "equalto", "Resolved") | list | length %}
+          {{ resolved_count }} <span style="font-size:1rem;color:var(--ink-soft);">Resolved</span>
+        </div>
+        <div class="kpi-sub">
+          {% set ongoing_count = trajectory.milestone_shifts | selectattr("status", "equalto", "Ongoing Focus Area") | list | length %}
+          {{ ongoing_count }} ongoing focus area(s)
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-lbl">Screening Cadence</div>
+        <div class="kpi-val val-neutral">
+          {{ trajectory.total_assessments }} <span style="font-size:1rem;color:var(--ink-soft);">Recorded</span>
+        </div>
+        <div class="kpi-sub">30-day recommended interval</div>
+      </div>
+    </div>
+
+    <!-- Narrative Callout -->
+    <div class="narrative-card">
+      💡 <strong>Clinical Trajectory Insight:</strong> {{ trajectory.summary_narrative }}
+    </div>
+
+    <!-- Interactive SVG Trajectory Timeline -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Longitudinal Risk Score Trajectory (Q-CHAT-10)</div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="dot-line" style="background:#0d7a6e;"></div>
+            <span>Trajectory Path</span>
+          </div>
+          <div class="legend-item">
+            <div class="dot-line" style="background:#c0392b;border-top:1px dashed #c0392b;"></div>
+            <span>40% Clinical Threshold</span>
+          </div>
+        </div>
+      </div>
+
+      {% if trajectory.assessments_timeline|length > 0 %}
+      <div class="svg-container">
+        <!-- SVG Trajectory Rendering -->
+        <svg viewBox="0 0 800 260" style="width:100%;height:260px;overflow:visible;">
+          <!-- Grid Lines -->
+          <line x1="60" y1="30" x2="760" y2="30" stroke="#e2e8f0" stroke-width="1" />
+          <text x="45" y="34" font-size="10" fill="#718096" text-anchor="end">100%</text>
+
+          <line x1="60" y1="80" x2="760" y2="80" stroke="#e2e8f0" stroke-width="1" />
+          <text x="45" y="84" font-size="10" fill="#718096" text-anchor="end">75%</text>
+
+          <!-- 40% Threshold Line -->
+          <line x1="60" y1="150" x2="760" y2="150" stroke="#c0392b" stroke-dasharray="5,4" stroke-width="1.5" />
+          <text x="45" y="154" font-size="10" fill="#c0392b" font-weight="bold" text-anchor="end">40%</text>
+
+          <line x1="60" y1="210" x2="760" y2="210" stroke="#e2e8f0" stroke-width="1" />
+          <text x="45" y="214" font-size="10" fill="#718096" text-anchor="end">0%</text>
+
+          <!-- Timeline Points and Polyline calculation -->
+          {% set count = trajectory.assessments_timeline|length %}
+          {% set step = (700 / (count - 1)) if count > 1 else 350 %}
+          
+          {% set points = [] %}
+          {% for a in trajectory.assessments_timeline %}
+            {% set cx = 60 + (loop.index0 * step) %}
+            {% set cy = 210 - (a.risk_probability * 1.8) %}
+            {% set _ = points.append(cx ~ ',' ~ cy) %}
+          {% endfor %}
+
+          <!-- Trajectory line -->
+          <polyline
+            fill="none"
+            stroke="#0d7a6e"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            points="{{ points | join(' ') }}"
+          />
+
+          <!-- Gradient Area Under Curve -->
+          <polygon
+            fill="rgba(13, 122, 110, 0.08)"
+            points="60,210 {{ points | join(' ') }} {{ (60 + ((count - 1) * step)) }},210"
+          />
+
+          <!-- Point Dots -->
+          {% for a in trajectory.assessments_timeline %}
+            {% set cx = 60 + (loop.index0 * step) %}
+            {% set cy = 210 - (a.risk_probability * 1.8) %}
+            <circle cx="{{ cx }}" cy="{{ cy }}" r="6" fill="#fff" stroke="#0d7a6e" stroke-width="3.5" />
+            <text x="{{ cx }}" y="{{ cy - 12 }}" font-size="11" font-weight="bold" fill="#0d7a6e" text-anchor="middle">
+              {{ "%.1f"|format(a.risk_probability) }}%
+            </text>
+            <text x="{{ cx }}" y="235" font-size="10" fill="#718096" text-anchor="middle">
+              {{ a.completed_at.strftime('%b %d') }}
+            </text>
+            <text x="{{ cx }}" y="248" font-size="9" fill="#a0aec0" text-anchor="middle">
+              {{ a.age_months }} mo
+            </text>
+          {% endfor %}
+        </svg>
+      </div>
+      {% else %}
+      <p style="color:var(--ink-soft);text-align:center;padding:2rem;">
+        No trajectory data yet. Complete a screening to begin tracking.
+      </p>
+      {% endif %}
+    </div>
+
+    <!-- Milestone Progression Matrix -->
+    <div class="section-head">
+      <span>Milestone Status & Shifts</span>
+      <span style="font-size:0.85rem;color:var(--ink-soft);font-family:var(--sans);">Latest vs Previous Evaluation</span>
+    </div>
+
+    <div class="milestones-grid">
+      {% for m in trajectory.milestone_shifts %}
+      <div class="milestone-card">
+        <div>
+          <div class="m-head">
+            <span class="m-code">{{ m.code }}</span>
+            <span class="badge-status {{ 'status-resolved' if m.status == 'Resolved' else ('status-ongoing' if m.status == 'Ongoing Focus Area' else ('status-new' if m.status == 'New Flag Identified' else 'status-typical')) }}">
+              {{ m.status }}
+            </span>
+          </div>
+          <div class="m-label">{{ m.label }}</div>
+        </div>
+        <div style="font-size:0.8rem;color:var(--ink-soft);margin-top:0.5rem;display:flex;justify-content:space-between;">
+          <span>Observed: <strong>
+            {% if m.current_score == 0 %}Always
+            {% elif m.current_score == 1 %}Usually
+            {% elif m.current_score == 2 %}Sometimes
+            {% elif m.current_score == 3 %}Rarely
+            {% else %}Never{% endif %}
+          </strong></span>
+          {% if m.previous_score is not none %}
+            <span>Prev: {% if m.previous_score == 0 %}Always{% elif m.previous_score == 1 %}Usually{% elif m.previous_score == 2 %}Sometimes{% elif m.previous_score == 3 %}Rarely{% else %}Never{% endif %}</span>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Chronological Assessment Records -->
+    <div class="section-head">Assessment Timeline History</div>
+    {% for a in trajectory.assessments_timeline|reverse %}
+    <div class="history-card">
+      <div class="h-header">
+        <div>
+          <div class="h-date">{{ a.completed_at.strftime('%B %d, %Y') }}</div>
+          <div style="font-size:0.82rem;color:var(--ink-soft);">Child Age: {{ a.age_months }} months • {{ a.total_flags }} milestones flagged</div>
+        </div>
+        <div class="h-risk {{ 'val-high' if a.risk_probability >= 40 else 'val-low' }}">
+          {{ "%.1f"|format(a.risk_probability) }}% Risk
+        </div>
+      </div>
+
+      {% if a.profile_explained %}
+      <p style="font-size:0.9rem;color:var(--ink-soft);margin-bottom:0.75rem;font-style:italic;">
+        "{{ a.profile_explained }}"
+      </p>
+      {% endif %}
+
+      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;font-size:0.82rem;margin-top:0.5rem;">
+        {% if a.top_recommended_app %}
+        <span style="background:var(--cream);padding:3px 8px;border-radius:4px;">📱 App: <strong>{{ a.top_recommended_app }}</strong></span>
+        {% endif %}
+        {% if a.top_recommended_book %}
+        <span style="background:var(--cream);padding:3px 8px;border-radius:4px;">📖 Book: <strong>{{ a.top_recommended_book }}</strong></span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+
+  </main>
+
+  <!-- Add Child Modal -->
+  <div class="modal-backdrop" id="addChildModal">
+    <div class="modal-card">
+      <h2 class="modal-title">👶 Add Child Profile</h2>
+      <form id="addChildForm" onsubmit="handleCreateChild(event)">
+        <div class="form-group">
+          <label>Child First Name / Nickname</label>
+          <input type="text" id="childFirstName" required placeholder="e.g. Leo" />
+        </div>
+        <div class="form-group">
+          <label>Date of Birth</label>
+          <input type="date" id="childDOB" required />
+        </div>
+        <div class="form-group">
+          <label>Biological Sex</label>
+          <select id="childSex">
+            <option value="1">Male</option>
+            <option value="0">Female</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action btn-outline" onclick="closeAddChildModal()">Cancel</button>
+          <button type="submit" class="btn-action btn-primary">Save Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleMenu() {
+      const toggle = document.getElementById('menuToggle');
+      const actions = document.getElementById('topbarActions');
+      if (toggle && actions) {
+        toggle.classList.toggle('open');
+        actions.classList.toggle('open');
+      }
+    }
+
+    function switchChild(childId) {
+      window.location.href = `/journey/${childId}`;
+    }
+
+    function openAddChildModal() {
+      document.getElementById('addChildModal').style.display = 'flex';
+    }
+
+    function closeAddChildModal() {
+      document.getElementById('addChildModal').style.display = 'none';
+    }
+
+    async function handleCreateChild(e) {
+      e.preventDefault();
+      const first_name = document.getElementById('childFirstName').value;
+      const date_of_birth = document.getElementById('childDOB').value;
+      const biological_sex = parseInt(document.getElementById('childSex').value);
+
+      try {
+        const res = await fetch('/api/v1/children', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name, date_of_birth, biological_sex })
+        });
+        if (!res.ok) throw new Error('Failed to create child profile.');
+        const child = await res.json();
+        window.location.href = `/journey/${child.id}`;
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,863 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ child.first_name }}'s Visual Schedules — NeuroAdapt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --ink: #0f1923;
+      --ink-soft: #445566;
+      --paper: #f7f4ee;
+      --cream: #ede9df;
+      --teal: #0d7a6e;
+      --teal-lt: #e0f4f2;
+      --teal-dk: #0a5f55;
+      --amber: #d97b00;
+      --amber-lt: #fff4e0;
+      --danger: #c0392b;
+      --danger-lt: #fdecea;
+      --safe: #1a7a3a;
+      --safe-lt: #e4f7ea;
+      --border: #d8d2c5;
+      --shadow: 0 4px 20px rgba(15, 25, 35, 0.08);
+      --radius: 16px;
+      --mono: 'DM Mono', monospace;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Outfit', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #21262b;
+        --ink-soft: #8fa4b8;
+        --paper: #0f1520;
+        --cream: #1a2230;
+        --teal: #3ecfc5;
+        --teal-lt: #0a2520;
+        --teal-dk: #5edfd5;
+        --border: #2a3848;
+        --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        --danger: #ff7060;
+        --danger-lt: #2a0808;
+        --safe: #50d878;
+        --safe-lt: #082010;
+        --amber: #ffa030;
+        --amber-lt: #1a0e00;
+      }
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      background: var(--ink);
+      color: #fff;
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      margin-left: 2rem;
+      gap: 1.5rem;
+    }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 19px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.25s ease-in-out;
+    }
+    .menu-toggle.open .bar:nth-child(1) {
+      transform: translateY(8.5px) rotate(45deg);
+    }
+    .menu-toggle.open .bar:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.open .bar:nth-child(3) {
+      transform: translateY(-8.5px) rotate(-45deg);
+    }
+
+    @media (max-width: 960px) {
+      .menu-toggle {
+        display: flex;
+      }
+      .topbar {
+        padding: 0.8rem 1.25rem;
+        flex-wrap: wrap;
+      }
+      .topbar-actions {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0 !important;
+        padding-top: 1rem;
+        margin-top: 0.6rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 0.85rem;
+      }
+      .topbar-actions.open {
+        display: flex;
+        animation: navDrawerFade 0.2s ease-out;
+      }
+      .topbar-nav {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 0.4rem;
+      }
+      .topbar-nav .nav-link {
+        padding: 0.55rem 0.8rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+      }
+      .topbar-user-area {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 0.6rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed rgba(255,255,255,0.12);
+      }
+      .child-select-wrap {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .child-select {
+        flex: 1;
+        max-width: none;
+      }
+      .btn-logout {
+        width: 100%;
+        text-align: center;
+        padding: 0.5rem;
+        display: block;
+        box-sizing: border-box;
+      }
+      @keyframes navDrawerFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .topbar-brand span {
+      color: var(--teal);
+    }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-link.active {
+      color: var(--teal);
+      border-bottom: 2px solid var(--teal);
+    }
+
+    .child-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .child-select {
+      background: transparent;
+      color: #fff;
+      border: none;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .child-select option {
+      background: #0f1923;
+      color: #fff;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+    }
+
+    .page-title {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 300;
+    }
+
+    .page-title em {
+      color: var(--teal);
+      font-style: italic;
+    }
+
+    /* Progress & Streak Bar */
+    .progress-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .progress-info {
+      flex: 1;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 10px;
+      background: var(--cream);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 0.6rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), #5ecfc5);
+      transition: width 0.4s ease;
+    }
+
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--amber-lt);
+      color: var(--amber);
+      border: 1px solid rgba(217, 123, 0, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    /* Routine Selector Tabs */
+    .routine-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+
+    .tab-btn {
+      padding: 0.55rem 1.1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--teal);
+      color: #fff;
+      border-color: var(--teal);
+    }
+
+    /* Task Cards */
+    .tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .task-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: var(--shadow);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .task-card.completed {
+      background: var(--safe-lt);
+      border-color: rgba(26, 122, 58, 0.3);
+      opacity: 0.85;
+    }
+
+    .task-card.completed .task-title {
+      text-decoration: line-through;
+      color: var(--ink-soft);
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .task-order-ctrls {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .btn-arrow {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .btn-arrow:hover {
+      background: var(--cream);
+      color: var(--ink);
+    }
+
+    .task-icon-box {
+      width: 52px;
+      height: 52px;
+      background: var(--cream);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+
+    .task-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .task-meta {
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    /* Checkmark button */
+    .btn-check {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2.5px solid var(--border);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-check:hover {
+      transform: scale(1.08);
+      border-color: var(--safe);
+    }
+
+    .task-card.completed .btn-check {
+      background: var(--safe);
+      border-color: var(--safe);
+      color: #fff;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--teal-dk);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--ink);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 25, 35, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+
+    .modal-card {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 460px;
+      padding: 1.75rem;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .icon-palette {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      margin: 0.75rem 0;
+    }
+
+    .icon-option {
+      font-size: 1.6rem;
+      padding: 0.5rem;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .icon-option.selected {
+      border-color: var(--teal);
+      background: var(--teal-lt);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <a href="/" class="topbar-brand">🧠 Neuro<span>Adapt</span></a>
+
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <div class="topbar-actions" id="topbarActions">
+      <nav class="topbar-nav">
+        <a href="/" class="nav-link">Screening</a>
+        <a href="/journey/{{ child.id }}" class="nav-link">Journey Loop</a>
+        <a href="/schedule/{{ child.id }}" class="nav-link active">Visual Schedules</a>
+        <a href="/meltdown/{{ child.id }}/active" class="nav-link" style="color:#ff6b6b;font-weight:600;">🚨 Meltdowns</a>
+        <a href="/apps-page" class="nav-link">Apps</a>
+        {% if user and user.role == 'clinician' %}
+        <a href="/clinician/dashboard" class="nav-link">Caseload</a>
+        {% endif %}
+        <a href="/evidence" class="nav-link">Evidence</a>
+      </nav>
+
+      <div class="topbar-user-area" style="display:flex;align-items:center;gap:0.75rem;">
+        <div class="child-select-wrap">
+          <span>👶</span>
+          <select class="child-select" onchange="switchChild(this.value)">
+            {% for c in all_children %}
+            <option value="{{ c.id }}" {% if c.id==child.id %}selected{% endif %}>
+              {{ c.first_name }} ({{ c.age_months }}m)
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <a href="/logout" class="btn-logout"
+          style="font-family:var(--mono);font-size:0.75rem;color:#ff6b6b;text-decoration:none;border:1px solid #ff6b6b;padding:0.25rem 0.5rem;border-radius:5px;">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <div class="header-bar">
+      <div>
+        <h1 class="page-title">{{ child.first_name }}'s <em>Visual Schedules</em></h1>
+        <p style="color:var(--ink-soft);font-size:0.95rem;margin-top:0.3rem;">
+          Predictable daily routines to build confidence, reduce transition meltdowns, and foster autonomy.
+        </p>
+      </div>
+      <div>
+        <button class="btn-action btn-primary" onclick="openAddTaskModal()">
+          ➕ Add Task Card
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Schedule -->
+    {% if schedules and schedules|length > 0 %}
+    {% set active_sched = schedules[0] %}
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;margin-top:0.5rem;">
+      <h2 style="font-family:var(--serif);font-size:1.35rem;color:var(--ink);">
+        📋 {{ active_sched.title }}
+      </h2>
+      <span
+        style="font-family:var(--mono);font-size:0.75rem;background:var(--teal-lt);color:var(--teal);padding:0.3rem 0.65rem;border-radius:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+        {{ active_sched.schedule_type }}
+      </span>
+    </div>
+
+    <!-- Progress & Streak Widget -->
+    <div class="progress-card">
+      <div class="progress-info">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <strong style="font-size:1.05rem;">Today's Routine Progress</strong>
+          <span style="font-family:var(--mono);font-weight:700;color:var(--teal);" id="progressText">
+            {{ active_sched.completed_tasks_count }} of {{ active_sched.total_tasks_count }} completed
+          </span>
+        </div>
+        <div class="progress-bar-wrap">
+          {% set pct = (active_sched.completed_tasks_count / active_sched.total_tasks_count * 100) if
+          active_sched.total_tasks_count > 0 else 0 %}
+          <div class="progress-bar-fill" id="progressFill" style="width: {{ pct }}%;"></div>
+        </div>
+      </div>
+
+      <div class="streak-badge">
+        🔥 {{ active_sched.streak_days }}-Day Streak
+      </div>
+    </div>
+
+    <!-- Task Cards List -->
+    <div class="tasks-list" id="tasksList">
+      {% set icon_map = {
+      "brush_teeth": "🪥",
+      "wash_face": "🧼",
+      "get_dressed": "👕",
+      "breakfast": "🥣",
+      "shoes": "👟",
+      "backpack": "🎒",
+      "playtime": "🧸",
+      "reading": "📖",
+      "bedtime": "🛏️",
+      "star": "⭐"
+      } %}
+
+      {% for t in active_sched.tasks %}
+      <div class="task-card {% if t.completed_today %}completed{% endif %}" id="card-{{ t.id }}" data-id="{{ t.id }}"
+        data-seq="{{ t.sequence_order }}">
+        <div class="task-left">
+          <div class="task-order-ctrls">
+            <button class="btn-arrow" onclick="moveTask('{{ t.id }}', -1)" title="Move up">▲</button>
+            <button class="btn-arrow" onclick="moveTask('{{ t.id }}', 1)" title="Move down">▼</button>
+          </div>
+
+          <div class="task-icon-box">
+            {{ icon_map.get(t.icon_key, "⭐") }}
+          </div>
+
+          <div>
+            <div class="task-title">{{ t.title }}</div>
+            <div class="task-meta">
+              {% if t.scheduled_time %}Scheduled: {{ t.scheduled_time }}{% else %}Step #{{ t.sequence_order }}{% endif
+              %}
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <button class="btn-check" onclick="toggleTask('{{ t.id }}')" title="Mark complete">
+            {% if t.completed_today %}✓{% endif %}
+          </button>
+          <button onclick="deleteTask('{{ t.id }}')"
+            style="background:none;border:none;color:#a0aec0;cursor:pointer;font-size:0.9rem;"
+            title="Delete task">✕</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div
+      style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:3rem;text-align:center;">
+      <p style="color:var(--ink-soft);margin-bottom:1rem;">No routines set up yet.</p>
+      <button class="btn-action btn-primary" onclick="openAddTaskModal()">Create First Routine Task</button>
+    </div>
+    {% endif %}
+
+  </main>
+
+  <!-- Add Task Modal -->
+  <div class="modal-backdrop" id="addTaskModal">
+    <div class="modal-card">
+      <h2 style="font-family:var(--serif);font-size:1.35rem;margin-bottom:1rem;">➕ Add Routine Task Card</h2>
+
+      <form id="addTaskForm" onsubmit="handleCreateTask(event)">
+        <div style="margin-bottom:1rem;">
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.35rem;">Task Title</label>
+          <input type="text" id="taskTitle" required placeholder="e.g. Put on Pajamas"
+            style="width:100%;padding:0.65rem;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:0.95rem;" />
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.35rem;">Pick an Icon
+            Glyph</label>
+          <div class="icon-palette" id="iconPalette">
+            <div class="icon-option selected" data-icon="brush_teeth">🪥</div>
+            <div class="icon-option" data-icon="wash_face">🧼</div>
+            <div class="icon-option" data-icon="get_dressed">👕</div>
+            <div class="icon-option" data-icon="breakfast">🥣</div>
+            <div class="icon-option" data-icon="shoes">👟</div>
+            <div class="icon-option" data-icon="backpack">🎒</div>
+            <div class="icon-option" data-icon="playtime">🧸</div>
+            <div class="icon-option" data-icon="reading">📖</div>
+            <div class="icon-option" data-icon="bedtime">🛏️</div>
+            <div class="icon-option" data-icon="star">⭐</div>
+          </div>
+          <input type="hidden" id="selectedIcon" value="brush_teeth" />
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+          <button type="button" class="btn-action btn-outline" onclick="closeAddTaskModal()">Cancel</button>
+          <button type="submit" class="btn-action btn-primary">Add Task Card</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const CHILD_ID = "{{ child.id }}";
+    const SCHEDULE_ID = "{% if schedules and schedules|length > 0 %}{{ schedules[0].id }}{% endif %}";
+
+    function toggleMenu() {
+      const toggle = document.getElementById('menuToggle');
+      const actions = document.getElementById('topbarActions');
+      if (toggle && actions) {
+        toggle.classList.toggle('open');
+        actions.classList.toggle('open');
+      }
+    }
+
+    function switchChild(childId) {
+
+      window.location.href = `/schedule/${childId}`;
+    }
+
+    function openAddTaskModal() {
+      document.getElementById('addTaskModal').style.display = 'flex';
+    }
+
+    function closeAddTaskModal() {
+      document.getElementById('addTaskModal').style.display = 'none';
+    }
+
+    // Icon palette selection
+    document.querySelectorAll('.icon-option').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.icon-option').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('selectedIcon').value = el.getAttribute('data-icon');
+      });
+    });
+
+    async function toggleTask(taskId) {
+      const card = document.getElementById(`card-${taskId}`);
+      const btn = card.querySelector('.btn-check');
+
+      try {
+        const res = await fetch(`/api/v1/schedules/tasks/${taskId}/complete`, {
+          method: 'POST'
+        });
+        if (!res.ok) throw new Error('Failed to toggle task');
+        const data = await res.json();
+
+        if (data.completed_today) {
+          card.classList.add('completed');
+          btn.textContent = '✓';
+          // Celebratory Confetti Burst!
+          confetti({
+            particleCount: 80,
+            spread: 60,
+            origin: { y: 0.7 }
+          });
+        } else {
+          card.classList.remove('completed');
+          btn.textContent = '';
+        }
+        updateProgress();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    function updateProgress() {
+      const total = document.querySelectorAll('.task-card').length;
+      const completed = document.querySelectorAll('.task-card.completed').length;
+      const pct = total > 0 ? (completed / total) * 100 : 0;
+
+      document.getElementById('progressText').textContent = `${completed} of ${total} completed`;
+      document.getElementById('progressFill').style.width = `${pct}%`;
+    }
+
+    async function handleCreateTask(e) {
+      e.preventDefault();
+      const title = document.getElementById('taskTitle').value;
+      const icon_key = document.getElementById('selectedIcon').value;
+
+      try {
+        const res = await fetch(`/api/v1/schedules/${SCHEDULE_ID}/tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, icon_key })
+        });
+        if (!res.ok) throw new Error('Failed to create task card');
+        window.location.reload();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function deleteTask(taskId) {
+      if (!confirm('Are you sure you want to remove this task?')) return;
+      try {
+        const res = await fetch(`/api/v1/schedules/tasks/${taskId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete task');
+        document.getElementById(`card-${taskId}`).remove();
+        updateProgress();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function moveTask(taskId, direction) {
+      const card = document.getElementById(`card-${taskId}`);
+      const list = document.getElementById('tasksList');
+      const cards = Array.from(list.children);
+      const idx = cards.indexOf(card);
+      const newIdx = idx + direction;
+
+      if (newIdx < 0 || newIdx >= cards.length) return;
+
+      if (direction === -1) {
+        list.insertBefore(card, cards[newIdx]);
+      } else {
+        list.insertBefore(cards[newIdx], card);
+      }
+
+      // Reorder payload
+      const updatedCards = Array.from(list.children);
+      const payload = {
+        tasks: updatedCards.map((c, i) => ({
+          task_id: c.getAttribute('data-id'),
+          sequence_order: i + 1
+        }))
+      };
+
+      await fetch(`/api/v1/schedules/${SCHEDULE_ID}/tasks/reorder`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+  </script>
+</body>
+
+</html>

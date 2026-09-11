@@ -1,104 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>App Catalogue — NeuroAdapt</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --ink:      #0f1923;
+      --ink: #0f1923;
       --ink-soft: #445566;
-      --paper:    #f7f4ee;
-      --cream:    #ede9df;
-      --teal:     #0d7a6e;
-      --teal-lt:  #e0f4f2;
-      --teal-dk:  #0a5f55;
-      --border:   #d8d2c5;
-      --shadow:   0 2px 12px rgba(15,25,35,0.07);
-      --radius:   12px;
-      --mono:     'DM Mono', monospace;
-      --serif:    'Fraunces', Georgia, serif;
-      --sans:     'Outfit', sans-serif;
+      --paper: #f7f4ee;
+      --cream: #ede9df;
+      --teal: #0d7a6e;
+      --teal-lt: #e0f4f2;
+      --teal-dk: #0a5f55;
+      --border: #d8d2c5;
+      --shadow: 0 2px 12px rgba(15, 25, 35, 0.07);
+      --radius: 12px;
+      --mono: 'DM Mono', monospace;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Outfit', sans-serif;
     }
+
     @media (prefers-color-scheme: dark) {
       :root {
-        --ink:      #e0eaf4;
+        --ink: #21262b;
         --ink-soft: #8fa4b8;
-        --paper:    #0f1520;
-        --cream:    #1a2230;
-        --teal:     #3ecfc5;
-        --teal-lt:  #0a2520;
-        --teal-dk:  #5edfd5;
-        --border:   #2a3848;
-        --shadow:   0 2px 16px rgba(0,0,0,0.4);
+        --paper: #0f1520;
+        --cream: #1a2230;
+        --teal: #3ecfc5;
+        --teal-lt: #0a2520;
+        --teal-dk: #5edfd5;
+        --border: #2a3848;
+        --shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
       }
     }
 
-    body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; }
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
 
     /* ── Navbar ─────────────────────────────────────────────── */
-    nav {
-      background: var(--ink); padding: 0.9rem 2rem;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 100;
+    nav, .topbar {
+      background: var(--ink);
+      padding: 0.9rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .nav-brand { font-family: var(--serif); font-size: 1.05rem; color: #5ecfc5; font-weight: 600; text-decoration: none; }
-    .nav-links  { display: flex; align-items: center; gap: 0.5rem; }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 19px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.25s ease-in-out;
+    }
+    .menu-toggle.open .bar:nth-child(1) {
+      transform: translateY(8.5px) rotate(45deg);
+    }
+    .menu-toggle.open .bar:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.open .bar:nth-child(3) {
+      transform: translateY(-8.5px) rotate(-45deg);
+    }
+
+    @media (max-width: 960px) {
+      .menu-toggle {
+        display: flex;
+      }
+      nav, .topbar {
+        padding: 0.8rem 1.25rem;
+        flex-wrap: wrap;
+      }
+      .nav-links.topbar-actions {
+        display: none !important;
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0 !important;
+        padding-top: 1rem;
+        margin-top: 0.6rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 0.75rem;
+        align-items: stretch !important;
+      }
+      .nav-links.topbar-actions.open {
+        display: flex !important;
+        animation: navDrawerFade 0.2s ease-out;
+      }
+      .nav-link {
+        padding: 0.55rem 0.8rem;
+        font-size: 0.82rem;
+        border-radius: 6px;
+        text-align: left;
+        display: block;
+      }
+      .btn-chat-toggle, .btn-logout {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
+      }
+      .user-chip {
+        text-align: center;
+        width: 100%;
+        margin-bottom: 0.25rem;
+      }
+      @keyframes navDrawerFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+
+    .nav-brand {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      color: #5ecfc5;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     .nav-link {
-      font-family: var(--mono); font-size: 0.74rem; color: #8fa4b0;
-      text-decoration: none; border: 1px solid rgba(255,255,255,0.12);
-      padding: 0.3rem 0.75rem; border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      color: #8fa4b0;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
       transition: color 0.2s, border-color 0.2s;
     }
-    .nav-link:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
-    .nav-link.active { color: #5ecfc5; border-color: #5ecfc5; }
+
+    .nav-link:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-link.active {
+      color: #5ecfc5;
+      border-color: #5ecfc5;
+    }
+
     .btn-chat-toggle {
-      font-family: var(--mono); font-size: 0.74rem;
-      background: var(--teal); color: #fff; border: none;
-      padding: 0.32rem 0.85rem; border-radius: 6px;
-      cursor: pointer; display: flex; align-items: center; gap: 0.4rem;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      padding: 0.32rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
       transition: background 0.2s;
     }
-    .btn-chat-toggle:hover { background: var(--teal-dk); }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: #7fffcc; animation: pulse 1.8s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .btn-chat-toggle:hover {
+      background: var(--teal-dk);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #7fffcc;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
 
     /* ── Page ───────────────────────────────────────────────── */
-    .page { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 5rem;
+    }
 
-    .page-heading { font-family: var(--serif); font-size: 1.9rem; font-weight: 300; margin-bottom: 0.35rem; }
-    .page-heading em { color: var(--teal); font-style: italic; }
-    .page-sub { color: var(--ink-soft); font-size: 0.9rem; margin-bottom: 2rem; }
+    .page-heading {
+      font-family: var(--serif);
+      font-size: 1.9rem;
+      font-weight: 300;
+      margin-bottom: 0.35rem;
+    }
+
+    .page-heading em {
+      color: var(--teal);
+      font-style: italic;
+    }
+
+    .page-sub {
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
 
     /* ── Search / filter bar ────────────────────────────────── */
     .filter-bar {
-      display: flex; gap: 0.75rem; margin-bottom: 1.75rem;
-      flex-wrap: wrap; align-items: center;
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+      align-items: center;
     }
+
     .search-input {
-      flex: 1; min-width: 200px;
-      padding: 0.55rem 0.9rem; border: 1px solid var(--border);
-      border-radius: 8px; font-family: var(--sans); font-size: 0.88rem;
-      background: var(--paper); color: var(--ink); outline: none;
+      flex: 1;
+      min-width: 200px;
+      padding: 0.55rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
       transition: border-color 0.15s;
     }
-    .search-input:focus { border-color: var(--teal); }
+
+    .search-input:focus {
+      border-color: var(--teal);
+    }
+
     .filter-btn {
-      font-family: var(--mono); font-size: 0.73rem;
-      padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;
-      border: 1px solid var(--border); background: var(--paper);
-      color: var(--ink-soft); transition: all 0.15s;
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--paper);
+      color: var(--ink-soft);
+      transition: all 0.15s;
     }
-    .filter-btn.active, .filter-btn:hover {
-      background: var(--teal); border-color: var(--teal); color: #fff;
+
+    .filter-btn.active,
+    .filter-btn:hover {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
     }
+
     .results-count {
-      font-family: var(--mono); font-size: 0.75rem;
-      color: var(--ink-soft); margin-left: auto;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+      margin-left: auto;
     }
 
     /* ── App grid ───────────────────────────────────────────── */
@@ -114,200 +307,289 @@
       border-radius: var(--radius);
       padding: 1.25rem 1.35rem;
       box-shadow: var(--shadow);
-      display: flex; flex-direction: column; gap: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
       transition: box-shadow 0.2s, transform 0.2s;
       animation: fadeUp 0.3s ease both;
     }
-    .app-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+    .app-card:hover {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .app-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
-    .app-name { font-size: 0.95rem; font-weight: 500; line-height: 1.3; color: var(--ink); }
+    .app-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .app-name {
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+
     .price-badge {
-      font-family: var(--mono); font-size: 0.65rem; padding: 0.18rem 0.5rem;
-      border-radius: 4px; flex-shrink: 0;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: 4px;
+      flex-shrink: 0;
     }
-    .price-badge.free { background: var(--teal-lt); color: var(--teal); border: 1px solid var(--teal); }
-    .price-badge.paid { background: var(--cream); color: var(--ink-soft); border: 1px solid var(--border); }
 
-    .app-meta { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .price-badge.free {
+      background: var(--teal-lt);
+      color: var(--teal);
+      border: 1px solid var(--teal);
+    }
+
+    .price-badge.paid {
+      background: var(--cream);
+      color: var(--ink-soft);
+      border: 1px solid var(--border);
+    }
+
+    .app-meta {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
     .app-meta span {
-      font-family: var(--mono); font-size: 0.68rem;
-      background: var(--cream); color: var(--ink-soft);
-      padding: 0.1rem 0.4rem; border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      background: var(--cream);
+      color: var(--ink-soft);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
     }
-    .app-desc { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.6; flex: 1; }
 
-    .rating-row { display: flex; align-items: center; gap: 0.3rem; margin-top: auto; }
-    .stars { color: #f5a623; font-size: 0.8rem; }
-    .rating-val { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-soft); }
+    .app-desc {
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .rating-row {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: auto;
+    }
+
+    .stars {
+      color: #f5a623;
+      font-size: 0.8rem;
+    }
+
+    .rating-val {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+    }
 
     /* ── Empty state ────────────────────────────────────────── */
     .empty-state {
-      text-align: center; padding: 4rem 2rem;
-      color: var(--ink-soft); font-size: 0.9rem; grid-column: 1/-1;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      grid-column: 1/-1;
     }
-    .empty-state span { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
+
+    .empty-state span {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 0.75rem;
+    }
 
     @media (max-width: 600px) {
-      .page { padding: 1.5rem 1rem 3rem; }
-      .app-grid { grid-template-columns: 1fr; }
+      .page {
+        padding: 1.5rem 1rem 3rem;
+      }
+
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<!-- ── Navbar ─────────────────────────────────────────────────── -->
-<nav>
-  <a href="/" class="nav-brand">NeuroAdapt</a>
-  <div class="nav-links" style="display:flex;align-items:center;gap:0.75rem;">
-    {% if user %}
-    <span style="font-family:var(--mono);font-size:0.74rem;color:#8fa4b8;margin-right:0.5rem;">User: <strong style="color:#5ecfc5;">{{ user.username }}</strong> ({{ user.role }})</span>
-    {% endif %}
-    <a href="/" class="nav-link">Screening</a>
-    <a href="/apps-page" class="nav-link active">Apps</a>
-    <button class="btn-chat-toggle" onclick="toggleChat()">
-      <span class="dot"></span> Ask Nora AI
+  <!-- ── Navbar ─────────────────────────────────────────────────── -->
+  <nav class="topbar">
+    <a href="/" class="nav-brand">NeuroAdapt</a>
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
     </button>
-    {% if user %}
-    <button onclick="logout()" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;background:none;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;">Logout</button>
-    {% endif %}
-  </div>
-</nav>
-
-<!-- ── Page ───────────────────────────────────────────────────── -->
-<div class="page">
-  <h1 class="page-heading">Learning <em>App Catalogue</em></h1>
-  <p class="page-sub">
-    {{ apps | length }} educational apps curated for children with ASD and developmental delays.
-    Sourced from the Google Play Store and filtered for quality.
-  </p>
-
-  <!-- Filter bar -->
-  <div class="filter-bar">
-    <input
-      class="search-input" id="searchInput" type="text"
-      placeholder="Search by name, category, or keyword…"
-      oninput="filterApps()"
-    />
-    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-    <button class="filter-btn" onclick="setFilter('free', this)">Free</button>
-    <button class="filter-btn" onclick="setFilter('paid', this)">Paid</button>
-    <span class="results-count" id="resultsCount">{{ apps | length }} apps</span>
-  </div>
-
-  <!-- App grid -->
-  <div class="app-grid" id="appGrid">
-    {% for app in apps %}
-    <div
-      class="app-card"
-      data-name="{{ app.app_name | lower }}"
-      data-category="{{ app.category | lower }}"
-      data-desc="{{ app.description | lower }}"
-      data-price="{{ app.price | lower }}"
-      style="animation-delay: {{ loop.index0 * 0.04 }}s"
-    >
-      <div class="app-card-top">
-        <div class="app-name">{{ app.app_name }}</div>
-        <span class="price-badge {{ 'free' if app.price == 'Free' else 'paid' }}">
-          {{ app.price }}
-        </span>
-      </div>
-      <div class="app-meta">
-        <span>{{ app.category }}</span>
-        {% if app.rating > 0 %}
-        <span>⭐ {{ app.rating }}</span>
-        {% endif %}
-      </div>
-      <div class="app-desc">{{ app.description }}</div>
-      <div class="rating-row">
-        {% if app.rating > 0 %}
-        <span class="stars">
-          {% for i in range(app.rating | int) %}★{% endfor %}{% if app.rating % 1 >= 0.5 %}½{% endif %}
-        </span>
-        <span class="rating-val">{{ app.rating }} / 5</span>
-        {% endif %}
-      </div>
+    <div class="nav-links topbar-actions" id="topbarActions" style="display:flex;align-items:center;gap:0.75rem;">
+      {% if user %}
+      <span class="user-chip" style="font-family:var(--mono);font-size:0.74rem;color:#8fa4b8;margin-right:0.5rem;">User: <strong
+          style="color:#5ecfc5;">{{ user.username }}</strong> ({{ user.role }})</span>
+      {% endif %}
+      <a href="/" class="nav-link">Screening</a>
+      <a href="/journey" class="nav-link">Journey</a>
+      <a href="/schedule" class="nav-link">Schedules</a>
+      <a href="/meltdown" class="nav-link" style="color:#ff6b6b;font-weight:600;">🚨 Meltdowns</a>
+      <a href="/apps-page" class="nav-link active">Apps</a>
+      <a href="/evidence" class="nav-link">Evidence</a>
+      {% if user and user.role == 'clinician' %}
+      <a href="/clinician/dashboard" class="nav-link" style="color:#5ecfc5;">Caseload</a>
+      {% endif %}
+      <button class="btn-chat-toggle" onclick="toggleChat()">
+        <span class="dot"></span> Ask Nora AI
+      </button>
+      {% if user %}
+      <button onclick="logout()" class="btn-logout"
+        style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;background:none;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;">Logout</button>
+      {% endif %}
     </div>
-    {% else %}
-    <div class="empty-state">
-      <span>📭</span>
-      No apps in the catalogue yet.<br/>
-      Run the notebook to generate <code>app_cache.json</code>.
+  </nav>
+
+  <!-- ── Page ───────────────────────────────────────────────────── -->
+  <div class="page">
+    <h1 class="page-heading">Learning <em>App Catalogue</em></h1>
+    <p class="page-sub">
+      {{ apps | length }} educational apps curated for children with ASD and developmental delays.
+      Sourced from the Google Play Store and filtered for quality.
+    </p>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <input class="search-input" id="searchInput" type="text" placeholder="Search by name, category, or keyword…"
+        oninput="filterApps()" />
+      <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-btn" onclick="setFilter('free', this)">Free</button>
+      <button class="filter-btn" onclick="setFilter('paid', this)">Paid</button>
+      <span class="results-count" id="resultsCount">{{ apps | length }} apps</span>
     </div>
-    {% endfor %}
+
+    <!-- App grid -->
+    <div class="app-grid" id="appGrid">
+      {% for app in apps %}
+      <div class="app-card" data-name="{{ app.app_name | lower }}" data-category="{{ app.category | lower }}"
+        data-desc="{{ app.description | lower }}" data-price="{{ app.price | lower }}"
+        style="animation-delay: {{ loop.index0 * 0.04 }}s">
+        <div class="app-card-top">
+          <div class="app-name">{{ app.app_name }}</div>
+          <span class="price-badge {{ 'free' if app.price == 'Free' else 'paid' }}">
+            {{ app.price }}
+          </span>
+        </div>
+        <div class="app-meta">
+          <span>{{ app.category }}</span>
+          {% if app.rating > 0 %}
+          <span>⭐ {{ app.rating }}</span>
+          {% endif %}
+        </div>
+        <div class="app-desc">{{ app.description }}</div>
+        <div class="rating-row">
+          {% if app.rating > 0 %}
+          <span class="stars">
+            {% for i in range(app.rating | int) %}★{% endfor %}{% if app.rating % 1 >= 0.5 %}½{% endif %}
+          </span>
+          <span class="rating-val">{{ app.rating }} / 5</span>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <span>📭</span>
+        No apps in the catalogue yet.<br />
+        Run the notebook to generate <code>app_cache.json</code>.
+      </div>
+      {% endfor %}
+    </div>
   </div>
-</div>
 
-<!-- Chat drawer -->
-<script>
-  const SCREENING_CONTEXT = {
-    age: 0, sex_label: "Unknown", risk_probability: 0.0,
-    total_flags: 0, flagged_questions: [], recommended_apps: [],
-    profile_text: "general child development and autism awareness",
-    profile_explained: "", screened: false
-  };
-  const IS_RESULTS_PAGE = false;
-</script>
-{% set is_results_page = false %}
-{% set recommendations = [] %}
-{% set age = 0 %}{% set sex_label = "" %}{% set risk_probability = 0 %}{% set total_flags = 0 %}
-{% include "_chat.html" %}
-{% include "_chat_assets.html" %}
+  <!-- Chat drawer -->
+  <script>
+    const SCREENING_CONTEXT = {
+      age: 0, sex_label: "Unknown", risk_probability: 0.0,
+      total_flags: 0, flagged_questions: [], recommended_apps: [],
+      profile_text: "general child development and autism awareness",
+      profile_explained: "", screened: false
+    };
+    const IS_RESULTS_PAGE = false;
+  </script>
+  {% set is_results_page = false %}
+  {% set recommendations = [] %}
+  {% set age = 0 %}{% set sex_label = "" %}{% set risk_probability = 0 %}{% set total_flags = 0 %}
+  {% include "_chat.html" %}
+  {% include "_chat_assets.html" %}
 
-<script>
-  let activeFilter = 'all';
-
-  function filterApps() {
-    const query  = document.getElementById('searchInput').value.toLowerCase();
-    const cards  = document.querySelectorAll('.app-card');
-    let visible  = 0;
-
-    cards.forEach(card => {
-      const matchSearch = !query
-        || card.dataset.name.includes(query)
-        || card.dataset.category.includes(query)
-        || card.dataset.desc.includes(query);
-
-      const matchFilter = activeFilter === 'all'
-        || card.dataset.price === activeFilter;
-
-      const show = matchSearch && matchFilter;
-      card.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-
-    document.getElementById('resultsCount').textContent =
-      `${visible} app${visible !== 1 ? 's' : ''}`;
-  }
-
-  function setFilter(filter, btn) {
-    activeFilter = filter;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filterApps();
-  }
-
-  async function logout() {
-    try {
-      const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
-      if (token) {
-        await fetch('/auth/logout', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+  <script>
+    function toggleMenu() {
+      const toggle = document.getElementById('menuToggle');
+      const actions = document.getElementById('topbarActions');
+      if (toggle && actions) {
+        toggle.classList.toggle('open');
+        actions.classList.toggle('open');
       }
-    } catch (e) {
-      console.error("Logout API call failed:", e);
     }
-    document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
-    window.location.href = "/login";
-  }
-</script>
+
+    let activeFilter = 'all';
+
+    function filterApps() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.app-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const matchSearch = !query
+          || card.dataset.name.includes(query)
+          || card.dataset.category.includes(query)
+          || card.dataset.desc.includes(query);
+
+        const matchFilter = activeFilter === 'all'
+          || card.dataset.price === activeFilter;
+
+        const show = matchSearch && matchFilter;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      document.getElementById('resultsCount').textContent =
+        `${visible} app${visible !== 1 ? 's' : ''}`;
+    }
+
+    function setFilter(filter, btn) {
+      activeFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterApps();
+    }
+
+    async function logout() {
+      try {
+        await fetch('/auth/logout', { method: 'POST' });
+      } catch (e) {
+        console.error("Logout API call failed:", e);
+      }
+      window.location.href = "/login";
+    }
+  </script>
 
 </body>
+
 </html>

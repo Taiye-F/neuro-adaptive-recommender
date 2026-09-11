@@ -248,10 +248,14 @@
       }
 
       // Save token in cookie
-      document.cookie = `access_token=${data.access_token}; path=/; max-age=${data.expires_in}; SameSite=Lax`;
+      // HttpOnly cookie set automatically by server Set-Cookie header
       
-      // Redirect to home page
-      window.location.href = "/";
+      // Role-based redirection
+      if (data.role === "clinician") {
+        window.location.href = "/clinician/dashboard";
+      } else {
+        window.location.href = "/";
+      }
     } catch (err) {
       errorAlert.textContent = err.message;
       errorAlert.style.display = "block";

@@ -5,7 +5,7 @@ from typing import Optional, List
 import bcrypt
 import jwt
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status, Depends
+from fastapi import HTTPException, status, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from database import get_db, SessionLocal
 from models.auth_models import User
@@ -21,7 +21,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # Security scheme for token extraction
-security = HTTPBearer(auto_error=True)
+security = HTTPBearer(auto_error=False)
 
 class AuthService:
     @staticmethod
@@ -66,7 +66,8 @@ class AuthService:
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            expires_in=expires_in
+            expires_in=expires_in,
+            role=user.role
         )
 
     @staticmethod
@@ -179,10 +180,22 @@ class AuthService:
 
 # Dependency injection helpers
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    request: Request,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ) -> User:
-    token = credentials.credentials
+    token = None
+    if credentials and credentials.credentials:
+        token = credentials.credentials
+    elif "access_token" in request.cookies:
+        token = request.cookies.get("access_token")
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     token_data = AuthService.verify_access_token(token)
     user = UserRepository.get_by_username(db, token_data.username)
     if not user:

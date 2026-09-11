@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emergency Meltdown Response — {{ child.first_name }} | NeuroAdapt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600&family=DM+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0a0f16;
+      --card-bg:      #131c26;
+      --card-hover:   #192533;
+      --border:       #223244;
+      --text:         #f0f5fa;
+      --text-muted:   #8fa4b8;
+      --teal:         #3ecfc5;
+      --teal-dim:     rgba(62, 207, 197, 0.15);
+      --coral:        #ff6b6b;
+      --coral-dim:    rgba(255, 107, 107, 0.15);
+      --amber:        #ffa030;
+      --mono:         'DM Mono', monospace;
+      --sans:         'Outfit', sans-serif;
+      --serif:        'Fraunces', Georgia, serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 2rem;
+    }
+
+    /* Top Emergency Header */
+    .topbar {
+      background: #070a0f;
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 19px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.25s ease-in-out;
+    }
+    .menu-toggle.open .bar:nth-child(1) {
+      transform: translateY(8.5px) rotate(45deg);
+    }
+    .menu-toggle.open .bar:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.open .bar:nth-child(3) {
+      transform: translateY(-8.5px) rotate(-45deg);
+    }
+
+    @media (max-width: 960px) {
+      .menu-toggle {
+        display: flex;
+      }
+      .topbar {
+        padding: 0.8rem 1.25rem;
+        flex-wrap: wrap;
+      }
+      .top-actions.topbar-actions {
+        display: none !important;
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0 !important;
+        padding-top: 1rem;
+        margin-top: 0.6rem;
+        border-top: 1px solid var(--border);
+        gap: 0.65rem;
+        align-items: stretch !important;
+      }
+      .top-actions.topbar-actions.open {
+        display: flex !important;
+        animation: navDrawerFade 0.2s ease-out;
+      }
+      .btn-nav {
+        width: 100%;
+        text-align: left;
+        box-sizing: border-box;
+        padding: 0.55rem 0.8rem;
+      }
+      @keyframes navDrawerFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #fff;
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      text-decoration: none;
+    }
+    .badge-crisis {
+      background: var(--coral-dim);
+      border: 1px solid var(--coral);
+      color: var(--coral);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      animation: pulseAlert 2s infinite ease-in-out;
+    }
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+    .btn-nav:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+    /* Layout */
+    .container {
+      max-width: 960px;
+      margin: 1.5rem auto;
+      padding: 0 1.25rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Stopwatch Hero Card */
+    .stopwatch-card {
+      background: linear-gradient(180deg, #162230 0%, #0e1620 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .child-title {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .child-title strong { color: #fff; }
+    .timer-display {
+      font-family: var(--mono);
+      font-size: 4.5rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 24px rgba(62, 207, 197, 0.35);
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 600px) {
+      .timer-display { font-size: 3.2rem; }
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-timer {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .btn-toggle {
+      background: var(--teal);
+      color: #051412;
+    }
+    .btn-toggle:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-end {
+      background: var(--coral);
+      color: #fff;
+      font-weight: 700;
+    }
+    .btn-end:hover { background: #ff5252; transform: translateY(-1px); box-shadow: 0 0 16px rgba(255, 107, 107, 0.4); }
+    .btn-reset {
+      background: rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-reset:hover { color: #fff; background: rgba(255,255,255,0.12); }
+
+    /* Guided Breathing Section */
+    .breathing-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .breathing-info {
+      max-width: 460px;
+    }
+    .breathing-info h2 {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+    .breathing-info p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .breathing-circle-wrap {
+      width: 140px;
+      height: 140px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    .breathing-circle {
+      width: 90px;
+      height: 90px;
+      background: var(--teal-dim);
+      border: 2px solid var(--teal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--teal);
+      transition: all 0.3s ease;
+      animation: breathAnimation 19s infinite ease-in-out;
+    }
+    @keyframes breathAnimation {
+      0% { transform: scale(1); content: 'INHALE'; box-shadow: 0 0 10px rgba(62,207,197,0.2); }
+      21% { transform: scale(1.4); box-shadow: 0 0 25px rgba(62,207,197,0.5); }  /* 4s Inhale */
+      58% { transform: scale(1.4); box-shadow: 0 0 25px rgba(255,160,48,0.5); border-color: var(--amber); color: var(--amber); } /* 7s Hold */
+      100% { transform: scale(1); box-shadow: 0 0 10px rgba(62,207,197,0.2); border-color: var(--teal); color: var(--teal); } /* 8s Exhale */
+    }
+
+    /* Calming Strategies Grid */
+    .section-title {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .strategies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .strategy-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .strategy-card:hover {
+      border-color: rgba(62, 207, 197, 0.4);
+      background: var(--card-hover);
+    }
+    .strat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .strat-title {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .strat-badge {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+    }
+    .strat-action {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+    .strat-rationale {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ── Triage Modal ─────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 12, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: #111a24;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 600px;
+      width: 100%;
+      padding: 2rem;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      animation: modalUp 0.3s ease;
+    }
+    @keyframes modalUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-title {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+    .modal-sub {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .form-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .chip {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .chip:hover { border-color: var(--teal); color: #fff; }
+    .chip.selected {
+      background: var(--teal-dim);
+      border-color: var(--teal);
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    .intensity-picker {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+    }
+    .intensity-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 0.3rem;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .intensity-btn.selected {
+      background: var(--coral-dim);
+      border-color: var(--coral);
+      color: var(--coral);
+    }
+
+    .input-text, .textarea {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      width: 100%;
+    }
+    .textarea { resize: vertical; min-height: 70px; }
+    .input-text:focus, .textarea:focus { outline: none; border-color: var(--teal); }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="/" class="brand">NeuroAdapt</a>
+      <span class="badge-crisis">🚨 Active Meltdown Mode</span>
+    </div>
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+    <div class="top-actions topbar-actions" id="topbarActions">
+      <a href="/meltdown/{{ child.id }}/analytics" class="btn-nav">Trigger Analytics</a>
+      <a href="/journey/{{ child.id }}" class="btn-nav">Journey</a>
+      <a href="/schedule/{{ child.id }}" class="btn-nav">Schedules</a>
+      <a href="/evidence" class="btn-nav">Evidence</a>
+      <a href="/" class="btn-nav">Screening</a>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Hero Stopwatch Card -->
+    <div class="stopwatch-card">
+      <p class="child-title">Acute Incident Tracking for <strong>{{ child.first_name }}</strong></p>
+      <div class="timer-display" id="timerDisplay">00:00:00</div>
+
+      <div class="timer-controls">
+        <button class="btn-timer btn-toggle" id="btnToggleTimer" onclick="toggleTimer()">
+          ▶ Start Stopwatch
+        </button>
+        <button class="btn-timer btn-end" onclick="openTriageModal()">
+          ✓ End Incident & Log Triage
+        </button>
+        <button class="btn-timer btn-reset" onclick="resetTimer()">
+          ↺ Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Guided Breathing Widget -->
+    <div class="breathing-card">
+      <div class="breathing-info">
+        <h2>Co-Regulation 4-7-8 Breathing Guide</h2>
+        <p>
+          Calm your voice and model slow synchronized breathing.
+          Inhale deeply through the nose for 4s, hold for 7s, then exhale softly for 8s.
+        </p>
+      </div>
+      <div class="breathing-circle-wrap">
+        <div class="breathing-circle" id="breathCircle">BREATHE</div>
+      </div>
+    </div>
+
+    <!-- Calming Strategies Drawer -->
+    <div>
+      <h3 class="section-title">⚡ Quick Sensory Calming Prompts</h3>
+      <div class="strategies-grid">
+        {% for s in strategies %}
+        <div class="strategy-card">
+          <div class="strat-header">
+            <span class="strat-title">{{ s.icon }} {{ s.name }}</span>
+            <span class="strat-badge">{{ s.category }}</span>
+          </div>
+          <p class="strat-action">{{ s.action }}</p>
+          <p class="strat-rationale">{{ s.rationale }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Post-Event Triage Intake Modal ───────────────────────── -->
+  <div class="modal-overlay" id="triageModal">
+    <div class="modal-box">
+      <h3 class="modal-title">Post-Incident Triage Intake</h3>
+      <p class="modal-sub">
+        Record quick contextual parameters to help identify behavioral patterns and optimal calming interventions.
+      </p>
+
+      <form id="triageForm" onsubmit="submitTriage(event)">
+
+        <!-- Duration & Intensity -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Duration (Minutes)</label>
+            <input type="number" step="0.1" id="triageDurationMinutes" class="input-text" required />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Incident Intensity (1–5)</label>
+            <div class="intensity-picker" id="intensityPicker">
+              <button type="button" class="intensity-btn" onclick="setIntensity(1)">1</button>
+              <button type="button" class="intensity-btn selected" onclick="setIntensity(2)">2</button>
+              <button type="button" class="intensity-btn" onclick="setIntensity(3)">3</button>
+              <button type="button" class="intensity-btn" onclick="setIntensity(4)">4</button>
+              <button type="button" class="intensity-btn" onclick="setIntensity(5)">5</button>
+            </div>
+            <input type="hidden" id="triageIntensity" value="2" />
+          </div>
+        </div>
+
+        <!-- Triggers -->
+        <div class="form-group">
+          <label class="form-label">Potential Catalysts / Triggers (Select All Applicable)</label>
+          <div class="chip-group" id="triggerChips">
+            <div class="chip" onclick="toggleChip(this, 'triggers', 'noise')">🔊 Loud Noise / Overload</div>
+            <div class="chip" onclick="toggleChip(this, 'triggers', 'transition')">🔄 Activity Transition</div>
+            <div class="chip" onclick="toggleChip(this, 'triggers', 'hunger')">🍎 Hunger / Thirst</div>
+            <div class="chip" onclick="toggleChip(this, 'triggers', 'fatigue')">🥱 Fatigue / Sleep</div>
+            <div class="chip" onclick="toggleChip(this, 'triggers', 'crowds')">👥 Crowds / Strangers</div>
+            <div class="chip" onclick="toggleChip(this, 'triggers', 'communication')">🗣️ Communication Barrier</div>
+            <div class="chip" onclick="toggleChip(this, 'triggers', 'sensory')">👕 Tactile / Clothing</div>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label class="form-label">Incident Location</label>
+          <div class="chip-group" id="locationChips">
+            <div class="chip selected" onclick="setLocation(this, 'home')">🏠 Home</div>
+            <div class="chip" onclick="setLocation(this, 'school')">🏫 School / Daycare</div>
+            <div class="chip" onclick="setLocation(this, 'supermarket')">🛒 Supermarket / Store</div>
+            <div class="chip" onclick="setLocation(this, 'transit')">🚗 Vehicle / Transit</div>
+            <div class="chip" onclick="setLocation(this, 'social')">🎉 Social / Visit</div>
+            <div class="chip" onclick="setLocation(this, 'other')">📍 Other</div>
+          </div>
+          <input type="hidden" id="triageLocation" value="home" />
+        </div>
+
+        <!-- Calming Strategies Deployed -->
+        <div class="form-group">
+          <label class="form-label">Primary Calming Intervention Applied</label>
+          <div class="chip-group" id="strategyChips">
+            <div class="chip selected" onclick="setStrategy(this, 'Deep Pressure / Firm Hug', 'proprioceptive')">🤗 Deep Pressure</div>
+            <div class="chip" onclick="setStrategy(this, 'Noise Reduction / Mute', 'auditory')">🎧 Noise Reduction</div>
+            <div class="chip" onclick="setStrategy(this, 'Dim Lights & Visual Reduction', 'visual')">💡 Dim Lights</div>
+            <div class="chip" onclick="setStrategy(this, '4-7-8 Guided Breathing', 'breathing')">🫁 Breathing</div>
+            <div class="chip" onclick="setStrategy(this, 'Heavy Work & Push', 'proprioceptive')">🧱 Heavy Work</div>
+            <div class="chip" onclick="setStrategy(this, 'Cool Sensory Reset', 'tactile')">🧊 Cool Washcloth</div>
+          </div>
+          <input type="hidden" id="selectedStrategyName" value="Deep Pressure / Firm Hug" />
+          <input type="hidden" id="selectedStrategyCat" value="proprioceptive" />
+        </div>
+
+        <!-- Strategy Efficacy -->
+        <div class="form-group">
+          <label class="form-label">Intervention De-escalation Efficacy</label>
+          <div class="chip-group" id="efficacyChips">
+            <div class="chip selected" onclick="setEfficacy(this, 'effective')">⭐ Effective (Calmed Quickly)</div>
+            <div class="chip" onclick="setEfficacy(this, 'partially_effective')">⚠️ Partially Effective</div>
+            <div class="chip" onclick="setEfficacy(this, 'ineffective')">❌ Ineffective</div>
+          </div>
+          <input type="hidden" id="strategyEfficacy" value="effective" />
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label class="form-label">Caregiver Narrative / Observations (Optional)</label>
+          <textarea id="triageNotes" class="textarea" placeholder="E.g., Triggered when asked to turn off tablet for dinner. Calmed down once wrapped in weighted blanket."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-timer btn-reset" onclick="closeTriageModal()">Cancel</button>
+          <button type="submit" class="btn-timer btn-end">Save & View Analytics</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleMenu() {
+      const toggle = document.getElementById('menuToggle');
+      const actions = document.getElementById('topbarActions');
+      if (toggle && actions) {
+        toggle.classList.toggle('open');
+        actions.classList.toggle('open');
+      }
+    }
+    const CHILD_ID = '{{ child.id }}';
+
+    // ── Stopwatch Logic ──────────────────────────────────────────
+    let startTime = null;
+    let elapsedSeconds = 0;
+    let timerInterval = null;
+    let isRunning = false;
+
+    function updateDisplay() {
+      const hrs = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
+      const mins = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
+      const secs = (elapsedSeconds % 60).toString().padStart(2, '0');
+      document.getElementById('timerDisplay').textContent = `${hrs}:${mins}:${secs}`;
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('btnToggleTimer');
+      if (!isRunning) {
+        if (!startTime) startTime = new Date();
+        isRunning = true;
+        btn.textContent = '⏸ Pause Stopwatch';
+        btn.style.background = '#ffa030';
+        timerInterval = setInterval(() => {
+          elapsedSeconds++;
+          updateDisplay();
+        }, 1000);
+      } else {
+        isRunning = false;
+        btn.textContent = '▶ Resume Stopwatch';
+        btn.style.background = '#3ecfc5';
+        clearInterval(timerInterval);
+      }
+    }
+
+    function resetTimer() {
+      isRunning = false;
+      clearInterval(timerInterval);
+      elapsedSeconds = 0;
+      startTime = null;
+      document.getElementById('btnToggleTimer').textContent = '▶ Start Stopwatch';
+      document.getElementById('btnToggleTimer').style.background = '#3ecfc5';
+      updateDisplay();
+    }
+
+    // ── Triage Modal ─────────────────────────────────────────────
+    const selectedTriggers = new Set();
+
+    function toggleChip(el, group, val) {
+      if (selectedTriggers.has(val)) {
+        selectedTriggers.delete(val);
+        el.classList.remove('selected');
+      } else {
+        selectedTriggers.add(val);
+        el.classList.add('selected');
+      }
+    }
+
+    function setLocation(el, loc) {
+      document.querySelectorAll('#locationChips .chip').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('triageLocation').value = loc;
+    }
+
+    function setIntensity(lvl) {
+      document.querySelectorAll('#intensityPicker .intensity-btn').forEach(b => b.classList.remove('selected'));
+      event.target.classList.add('selected');
+      document.getElementById('triageIntensity').value = lvl;
+    }
+
+    function setStrategy(el, name, cat) {
+      document.querySelectorAll('#strategyChips .chip').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('selectedStrategyName').value = name;
+      document.getElementById('selectedStrategyCat').value = cat;
+    }
+
+    function setEfficacy(el, eff) {
+      document.querySelectorAll('#efficacyChips .chip').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('strategyEfficacy').value = eff;
+    }
+
+    function openTriageModal() {
+      // Pause stopwatch if running
+      if (isRunning) toggleTimer();
+      const mins = (elapsedSeconds / 60.0).toFixed(1);
+      document.getElementById('triageDurationMinutes').value = Math.max(0.5, mins);
+      document.getElementById('triageModal').classList.add('open');
+    }
+
+    function closeTriageModal() {
+      document.getElementById('triageModal').classList.remove('open');
+    }
+
+    async function submitTriage(e) {
+      e.preventDefault();
+      const durationMins = parseFloat(document.getElementById('triageDurationMinutes').value) || 1;
+      const durationSec = Math.round(durationMins * 60);
+      const intensity = parseInt(document.getElementById('triageIntensity').value, 10) || 2;
+      const location = document.getElementById('triageLocation').value || 'home';
+      const stratName = document.getElementById('selectedStrategyName').value;
+      const stratCat = document.getElementById('selectedStrategyCat').value;
+      const efficacy = document.getElementById('strategyEfficacy').value;
+      const notes = document.getElementById('triageNotes').value;
+
+      const payload = {
+        start_time: startTime ? startTime.toISOString() : new Date(Date.now() - durationSec * 1000).toISOString(),
+        end_time: new Date().toISOString(),
+        duration_seconds: durationSec,
+        intensity: intensity,
+        location: location,
+        triggers: Array.from(selectedTriggers),
+        strategies: [
+          {
+            strategy_name: stratName,
+            strategy_category: stratCat,
+            efficacy: efficacy,
+            notes: notes
+          }
+        ],
+        notes: notes
+      };
+
+      try {
+        const res = await fetch(`/api/v1/meltdowns/${CHILD_ID}/triage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          alert('Failed to log triage: ' + (err.detail || 'Unknown error'));
+          return;
+        }
+
+        window.location.href = `/meltdown/${CHILD_ID}/analytics`;
+      } catch (err) {
+        alert('Network error submitting incident triage: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
