@@ -31,3 +31,5 @@ vercel.json
 *.sqlite
 *.sqlite3
 recommender.db
+
+.env
