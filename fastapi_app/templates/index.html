@@ -530,8 +530,9 @@
     <a href="/community" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🤝 Village</a>
     {% if user and user.role == 'clinician' %}
     <a href="/clinician/dashboard" style="font-family:var(--mono);font-size:0.74rem;color:#3ecfc5;border:1px solid #3ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Clinician Caseload</a>
-    {% endif %}
     <a href="/evidence" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Evidence Library</a>
+    <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a>
+    {% endif %}
     <a href="{% if active_child %}/meltdown/{{ active_child.id }}/active{% else %}/meltdown{% endif %}" id="navMeltdownLink" style="font-family:var(--sans);font-weight:700;font-size:0.75rem;color:#fff;background:#c0392b;padding:0.32rem 0.75rem;border-radius:6px;text-decoration:none;display:flex;align-items:center;gap:0.3rem;">🚨 Meltdown Suite</a>
 
     <button class="btn-chat-toggle" onclick="toggleChat()"><span class="dot"></span> Ask Nora AI</button>
@@ -685,20 +686,8 @@
         </div>
       </div>
 
-      <!-- Top-N -->
-      <div class="card">
-        <div class="card-title">📱 Recommendation Count</div>
-        <div class="topn-row">
-          <label>Show me</label>
-          <div class="topn-btns" id="topnBtns">
-            <button type="button" class="topn-btn" onclick="setTopN(1)">1</button>
-            <button type="button" class="topn-btn active" onclick="setTopN(3)">3</button>
-            <button type="button" class="topn-btn" onclick="setTopN(5)">5</button>
-          </div>
-          <label>top apps</label>
-          <input type="hidden" name="top_n" id="topNVal" value="3" />
-        </div>
-      </div>
+      <!-- Top-N configuration defaulted to 3 -->
+      <input type="hidden" name="top_n" id="topNVal" value="3" />
 
       <button type="submit" class="btn-submit">
         Analyse Profile &amp; Generate Recommendations →
@@ -902,10 +891,10 @@ function onChildChange(childId) {
       const dob = new Date(dobStr);
       const diffMonths = Math.round((new Date() - dob) / (1000 * 60 * 60 * 24 * 30.44));
       if (diffMonths >= 12 && diffMonths <= 48) {
-        const ageSlider = document.getElementById('ageSlider');
+        const ageSlider = document.getElementById('ageRange');
         const ageVal = document.getElementById('ageVal');
         if (ageSlider) ageSlider.value = diffMonths;
-        if (ageVal) ageVal.textContent = diffMonths;
+        if (ageVal) ageVal.textContent = diffMonths + ' mo';
       }
     }
   }

@@ -518,11 +518,11 @@
         <a href="/schedule/{{ child.id }}" class="nav-link">Visual Schedules</a>
     <a href="/community" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🤝 Village</a>
         <a href="/meltdown/{{ child.id }}/active" class="nav-link" style="color:#ff6b6b;font-weight:600;">🚨 Meltdowns</a>
-        <a href="/apps-page" class="nav-link">Apps</a>
         {% if user and user.role == 'clinician' %}
         <a href="/clinician/dashboard" class="nav-link">Caseload</a>
-        {% endif %}
+        <a href="/apps-page" class="nav-link">Apps</a>
         <a href="/evidence" class="nav-link">Evidence</a>
+        {% endif %}
       </nav>
 
       <div class="topbar-user-area" style="display:flex;align-items:center;gap:0.75rem;">
@@ -769,10 +769,14 @@
 
       <div style="display:flex;flex-wrap:wrap;gap:0.75rem;font-size:0.82rem;margin-top:0.5rem;">
         {% if a.top_recommended_app %}
-        <span style="background:var(--cream);padding:3px 8px;border-radius:4px;">📱 App: <strong>{{ a.top_recommended_app }}</strong></span>
+        <a href="https://play.google.com/store/search?q={{ a.top_recommended_app | urlencode }}&c=apps" target="_blank" rel="noopener noreferrer" style="background:var(--cream);padding:3px 8px;border-radius:4px;text-decoration:none;color:var(--teal);display:inline-flex;align-items:center;gap:3px;font-weight:500;">
+          📱 App: <strong>{{ a.top_recommended_app }}</strong> ↗
+        </a>
         {% endif %}
         {% if a.top_recommended_book %}
-        <span style="background:var(--cream);padding:3px 8px;border-radius:4px;">📖 Book: <strong>{{ a.top_recommended_book }}</strong></span>
+        <a href="https://www.google.com/search?tbm=bks&q={{ a.top_recommended_book | urlencode }}" target="_blank" rel="noopener noreferrer" style="background:var(--cream);padding:3px 8px;border-radius:4px;text-decoration:none;color:var(--teal);display:inline-flex;align-items:center;gap:3px;font-weight:500;">
+          📖 Book: <strong>{{ a.top_recommended_book }}</strong> ↗
+        </a>
         {% endif %}
       </div>
     </div>

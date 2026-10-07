@@ -1,3 +1,5 @@
+import math
+from typing import Any
     
 
 """
@@ -110,6 +112,18 @@ class RecommendedApp(BaseModel):
     description : str
     url         : Optional[str] = None
     match_score : float = Field(..., description="TF-IDF cosine similarity score 0–100")
+    app_url     : Optional[str] = None
+
+    @field_validator("app_url", mode="before")
+    @classmethod
+    def coerce_nan_app_url(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
+        if isinstance(v, float) and (math.isnan(v) or v != v):
+            return None
+        if isinstance(v, str) and (v.strip() == "" or v.strip().lower() == "nan"):
+            return None
+        return str(v)
 
 
 class RecommendResponse(BaseModel):
@@ -130,6 +144,7 @@ class AppItem(BaseModel):
     rating      : float
     price       : str
     description : str
+    app_url     : Optional[str] = None
 
 
 class AppsResponse(BaseModel):
@@ -149,6 +164,17 @@ class BookItem(BaseModel):
     free_url    : Optional[str] = None
     paid_url    : Optional[str] = None
     cover_emoji : str = "📖"
+
+    @field_validator("free_url", "paid_url", mode="before")
+    @classmethod
+    def coerce_nan_urls(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
+        if isinstance(v, float) and (math.isnan(v) or v != v):
+            return None
+        if isinstance(v, str) and (v.strip() == "" or v.strip().lower() == "nan"):
+            return None
+        return str(v)
 
 
 class BookRecommendation(BookItem):
@@ -173,6 +199,18 @@ class RecommendedApp(BaseModel):
     description : str
     url         : Optional[str] = None
     match_score : float = Field(..., description="TF-IDF cosine similarity score 0–100")
+    app_url     : Optional[str] = None
+
+    @field_validator("app_url", mode="before")
+    @classmethod
+    def coerce_nan_app_url(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
+        if isinstance(v, float) and (math.isnan(v) or v != v):
+            return None
+        if isinstance(v, str) and (v.strip() == "" or v.strip().lower() == "nan"):
+            return None
+        return str(v)
 
 
 class RecommendResponse(BaseModel):

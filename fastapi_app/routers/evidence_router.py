@@ -1,9 +1,11 @@
 # routers/evidence_router.py
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Depends, status
 
 from schemas.domain_schemas import EvidenceSearchResponse
 from services.rag_evidence_service import EvidenceRAGService
+from services.auth_service import RoleChecker
+from models.auth_models import User
 
 evidence_router = APIRouter(prefix="/api/v1/evidence", tags=["Clinical RAG Evidence Engine"])
 
@@ -11,9 +13,10 @@ evidence_router = APIRouter(prefix="/api/v1/evidence", tags=["Clinical RAG Evide
 @evidence_router.get("/search", response_model=EvidenceSearchResponse)
 def search_clinical_evidence(
     q: str = Query("", description="Search term for trial, intervention, or clinical outcome"),
-    top_k: int = Query(5, ge=1, le=20)
+    top_k: int = Query(5, ge=1, le=20),
+    current_user: User = Depends(RoleChecker(["clinician"]))
 ):
-    """Perform semantic hybrid search over peer-reviewed ASD clinical trials, evidence tiers, and guidelines."""
+    """Perform semantic hybrid search over peer-reviewed ASD clinical trials, evidence tiers, and guidelines. Restricted to clinicians."""
     results = EvidenceRAGService.search_evidence(query=q, top_k=top_k)
     return EvidenceSearchResponse(
         query=q,
@@ -23,8 +26,11 @@ def search_clinical_evidence(
 
 
 @evidence_router.get("/interventions/{name}")
-def get_intervention_evidence_detail(name: str):
-    """Retrieve clinical validation parameters and trial citations for a specific intervention."""
+def get_intervention_evidence_detail(
+    name: str,
+    current_user: User = Depends(RoleChecker(["clinician"]))
+):
+    """Retrieve clinical validation parameters and trial citations for a specific intervention. Restricted to clinicians."""
     item = EvidenceRAGService.get_intervention_evidence(name)
     if not item:
         raise HTTPException(

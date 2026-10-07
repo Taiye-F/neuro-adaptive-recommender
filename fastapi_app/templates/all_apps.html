@@ -452,9 +452,9 @@
       <a href="/schedule" class="nav-link">Schedules</a>
       <a href="/community" class="nav-link">🤝 Village</a>
       <a href="/meltdown" class="nav-link" style="color:#ff6b6b;font-weight:600;">🚨 Meltdowns</a>
+      {% if user and user.role == 'clinician' %}
       <a href="/apps-page" class="nav-link active">Apps</a>
       <a href="/evidence" class="nav-link">Evidence</a>
-      {% if user and user.role == 'clinician' %}
       <a href="/clinician/dashboard" class="nav-link" style="color:#5ecfc5;">Caseload</a>
       {% endif %}
       <button class="btn-chat-toggle" onclick="toggleChat()">
@@ -492,7 +492,11 @@
         data-desc="{{ app.description | lower }}" data-price="{{ app.price | lower }}"
         style="animation-delay: {{ loop.index0 * 0.04 }}s">
         <div class="app-card-top">
-          <div class="app-name">{{ app.app_name }}</div>
+          <div class="app-name">
+            <a href="{{ app.app_url }}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;font-weight:600;">
+              {{ app.app_name }} ↗
+            </a>
+          </div>
           <span class="price-badge {{ 'free' if app.price == 'Free' else 'paid' }}">
             {{ app.price }}
           </span>

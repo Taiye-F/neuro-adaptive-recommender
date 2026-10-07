@@ -401,9 +401,9 @@
       <a href="/schedule/{{ child.id }}" class="nav-link">Visual Schedules</a>
     <a href="/community" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🤝 Village</a>
       <a href="/meltdown/{{ child.id }}/analytics" class="nav-link active">Meltdown Analytics</a>
-      <a href="/evidence" class="nav-link">Evidence</a>
       {% if user and user.role == 'clinician' %}
       <a href="/clinician/dashboard" class="nav-link" style="color:#5ecfc5;">Caseload</a>
+      <a href="/evidence" class="nav-link">Evidence</a>
       {% endif %}
     </div>
   </nav>

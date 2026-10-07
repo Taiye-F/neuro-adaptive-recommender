@@ -662,8 +662,8 @@
       <a href="/community" class="active">🤝 Village</a>
       {% if user and user.role == 'clinician' %}
       <a href="/clinician/dashboard">Clinician Caseload</a>
-      {% endif %}
       <a href="/evidence">Evidence Library</a>
+      {% endif %}
       <a href="{% if active_child %}/meltdown/{{ active_child.id }}/active{% else %}/meltdown{% endif %}" style="color:#ff7060;">🚨 Meltdown Suite</a>
     </div>
 

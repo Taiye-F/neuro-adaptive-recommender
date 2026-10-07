@@ -263,23 +263,49 @@ def _init_gemini() -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 def build_profile_text(scores: dict[str, Any]) -> str:
     a1 = map_likert_standard(scores.get("A1", "Usually"))
+    a2 = map_likert_standard(scores.get("A2", "Usually"))
     a3 = map_likert_standard(scores.get("A3", "Usually"))
     a4 = map_likert_standard(scores.get("A4", "Usually"))
+    a5 = map_likert_standard(scores.get("A5", "Usually"))
     a6 = map_likert_standard(scores.get("A6", "Usually"))
     a7 = map_likert_standard(scores.get("A7", "Usually"))
+    a8 = map_likert_standard(scores.get("A8", "Usually"))
     a9 = map_likert_reverse(scores.get("A9", "Never"))
     a10 = map_likert_reverse(scores.get("A10", "Never"))
 
     toddler_needs = []
+    # Speech & Language: A1 (responds to name) & A7 (uses words/speech)
     if a1 >= 3 or a7 >= 3:
-        toddler_needs.append("speech delay non-verbal communication talk words articulation")
-    if a3 >= 3 or a4 >= 3 or a6 >= 3:
-        toddler_needs.append("social interaction play cognitive learning pointing joint attention")
+        toddler_needs.append("speech delay non-verbal communication words language articulation speech therapy")
+    elif a1 == 2 or a7 == 2:
+        toddler_needs.append("early speech communication language enrichment words")
+
+    # Joint attention & eye contact: A2 (eye contact) & A6 (follows gaze/pointing)
+    if a2 >= 3 or a6 >= 3:
+        toddler_needs.append("eye contact joint attention social gaze engagement interactive connection")
+    elif a2 == 2 or a6 == 2:
+        toddler_needs.append("shared attention eye contact interactive engagement")
+
+    # Gestures & Shared Interest: A3 (points to wants) & A4 (points to share) & A8 (simple gestures)
+    if a3 >= 3 or a4 >= 3 or a8 >= 3:
+        toddler_needs.append("pointing gestures nonverbal communication social interaction sharing interest")
+    elif a3 == 2 or a4 == 2 or a8 == 2:
+        toddler_needs.append("gestures pointing nonverbal communication")
+
+    # Pretend play: A5 (pretend play / symbolic play)
+    if a5 >= 3:
+        toddler_needs.append("pretend play imaginative play symbolic play toys imitation social play")
+    elif a5 == 2:
+        toddler_needs.append("creative play toys imitation social engagement")
+
+    # Sensory processing & routines: A9 (sensory reactions) & A10 (repetitive behaviors)
     if a9 >= 3 or a10 >= 3:
-        toddler_needs.append("sensory meltdowns routine calm visual behavior ADHD")
-    
+        toddler_needs.append("sensory processing meltdowns routine calm visual schedule emotional regulation behavior ADHD sensory diet")
+    elif a9 == 2 or a10 == 2:
+        toddler_needs.append("sensory regulation routine calm visual structure")
+
     if not toddler_needs:
-        toddler_needs.append("autism special education cognitive skills")
+        toddler_needs.append("early childhood developmental milestones social communication play curiosity language enrichment")
         
     return " ".join(toddler_needs)
 
@@ -295,14 +321,33 @@ async def explain_profile(
 ) -> str:
     """
     Uses Gemini to generate a warm, parent-friendly summary of the screening
-    result — for both high and low risk outcomes.
+    result — for both high and low risk outcomes, with a deterministic milestone fallback.
     """
-    if not gemini_client:
-        return ""
-
     flagged_labels = ", ".join(
         f"{d['code']} ({d['label']})" for d in flagged_details
     ) or "none"
+
+    def _fallback_explanation() -> str:
+        if flagged_details:
+            top_areas = ", ".join([d["label"].lower() for d in flagged_details[:3]])
+            if risk_probability >= 40.0:
+                return (
+                    f"Based on the developmental screening, your toddler shows areas where extra support can make a big difference, "
+                    f"particularly around {top_areas}. Early childhood intervention, guided play routines, and structured communication "
+                    f"tools provide proven positive scaffolding for your child's ongoing development."
+                )
+            else:
+                return (
+                    f"Your toddler's screening shows an encouraging developmental profile, with emerging focus areas around {top_areas}. "
+                    f"Continuing positive daily play, shared reading, and responsive interactions will support their natural milestone progression."
+                )
+        return (
+            "Your toddler is meeting typical developmental milestones across all screened areas. "
+            "Continuing positive daily interactive play, language exploration, and social routines will keep fostering their growth."
+        )
+
+    if not gemini_client:
+        return _fallback_explanation()
 
     if risk_probability >= 40.0:
         prompt = f"""
@@ -334,15 +379,10 @@ async def explain_profile(
             model=GEMINI_MODEL,
             contents=[{"role": "user", "parts": [{"text": prompt}]}],
         )
-        return response.text.strip() or ""
+        return response.text.strip() or _fallback_explanation()
     except Exception as e:
         log.warning(f"Profile Explanation failed: {e}")
-        # Safe fallback
-        return (
-            f"Your child may benefit from extra support in areas such as "
-            f"communication, eye contact, or sensory regulation. "
-            f"Early help can make a big difference."
-        )
+        return _fallback_explanation()
 
 
 def predict_risk(scores: dict[str, Any]) -> float:
@@ -380,79 +420,110 @@ def predict_risk(scores: dict[str, Any]) -> float:
     return float(state.model.predict_proba(input_df)[0][1] * 100)
 
 
-def recommend_apps(profile_text: str, top_n: int) -> list[RecommendedApp]:
-    """Applies TF-IDF Cosine Similarity and Evidence-Based fallbacks to rank apps."""
+def recommend_apps(profile_text: str, top_n: int = 3) -> list[RecommendedApp]:
+    """Applies TF-IDF Cosine Similarity and Evidence-Based prioritization to rank apps.
+    Completely eliminates 0.0% matches and attaches valid store links."""
     if state.df_apps.empty or state.app_tfidf is None:
         return []
     
+    import urllib.parse
     qvec = state.app_tfidf.transform([profile_text])
     scores = (cosine_similarity(qvec, state.app_matrix).flatten() * 100).round(1)
     
     df = state.df_apps.copy()
     df["match_score"] = scores
 
-    # Apply strict matching (Match Score >= 30% and Evidence-Based)
-    strict_matches = df[
-        (df['match_score'] >= 30) & (df['Evidence_Based'] == True)
+    # CRITICAL: Filter out 0.0% matches completely!
+    df_positive = df[df["match_score"] > 0].copy()
+    if df_positive.empty:
+        return []
+
+    # Priority 1: Strict high matches (>= 20%) that are Evidence-Based
+    strict_matches = df_positive[
+        (df_positive['match_score'] >= 20) & (df_positive['Evidence_Based'] == True)
     ].sort_values(by='match_score', ascending=False)
 
     if len(strict_matches) > 0:
-        ranked_apps = strict_matches
+        remaining = df_positive[~df_positive.index.isin(strict_matches.index)].sort_values(
+            by=['Evidence_Based', 'match_score', 'Rating'], ascending=[False, False, False]
+        )
+        ranked_apps = pd.concat([strict_matches, remaining])
     else:
-        # Fallback 1: Any verified evidence-based apps
-        fallback_apps = df[
-            df['Evidence_Based'] == True
-        ].sort_values(by='match_score', ascending=False)
-        
-        if len(fallback_apps) > 0:
-            ranked_apps = fallback_apps
-        else:
-            # Fallback 2: Close matches by relevance only
-            ranked_apps = df.sort_values(by='match_score', ascending=False)
+        # Priority 2: Rank by Evidence-Based, match score, rating
+        ranked_apps = df_positive.sort_values(
+            by=['Evidence_Based', 'match_score', 'Rating'],
+            ascending=[False, False, False]
+        )
+
+    # Double check that zero matches are never returned
+    ranked_apps = ranked_apps[ranked_apps['match_score'] > 0]
+    if ranked_apps.empty:
+        return []
 
     top = ranked_apps.head(top_n).reset_index(drop=True)
     
-    return [
-        RecommendedApp(
-            rank=i + 1,
-            app_name=row["App_Name"],
-            category=row.get("Category", ""),
-            rating=float(row.get("Rating", 0)),
-            price=row.get("Price", ""),
-            description=str(row.get("Description", ""))[:200],
-            url=row.get("App_Link"),
-            match_score=float(row["match_score"]),
+    results = []
+    for i, row in top.iterrows():
+        app_name = clean_nan(row.get("App_Name")) or ""
+        link = clean_nan(row.get("App_Link")) or clean_nan(row.get("app_url")) or clean_nan(row.get("url"))
+        if not link:
+            link = f"https://play.google.com/store/search?q={urllib.parse.quote(app_name)}&c=apps"
+
+        results.append(
+            RecommendedApp(
+                rank=i + 1,
+                app_name=app_name,
+                category=clean_nan(row.get("Category")) or "",
+                rating=float(row.get("Rating", 0) if not pd.isna(row.get("Rating")) else 0),
+                price=clean_nan(row.get("Price")) or "Free",
+                description=str(clean_nan(row.get("Description")) or "")[:200],
+                match_score=float(row["match_score"]),
+                app_url=str(link),
+                url=str(link),
+            )
         )
-        for i, row in top.iterrows()
-    ]
+    return results
 
 
-def recommend_books(profile_text: str, top_n: int) -> list[BookRecommendation]:
+def recommend_books(profile_text: str, top_n: int = 3) -> list[BookRecommendation]:
     """Uses TF-IDF similarity to recommend relevant educational/parental guidance books."""
     if state.df_books.empty or state.book_tfidf is None:
         return []
     
+    import urllib.parse
     qvec = state.book_tfidf.transform([profile_text])
     scores = (cosine_similarity(qvec, state.book_matrix).flatten() * 100).round(1)
     
     df = state.df_books.copy()
     df["match_score"] = scores
     
-    top = df.sort_values("match_score", ascending=False).head(top_n).reset_index(drop=True)
+    df_positive = df[df["match_score"] > 0]
+    if not df_positive.empty:
+        top = df_positive.sort_values("match_score", ascending=False).head(top_n).reset_index(drop=True)
+    else:
+        top = df.sort_values("match_score", ascending=False).head(top_n).reset_index(drop=True)
     
-    return [
-        BookRecommendation(
-            rank=i + 1,
-            title=row["title"],
-            author=row["author"],
-            category=row.get("category", ""),
-            age_range=row.get("age_range", ""),
-            description=str(row.get("description", ""))[:200],
-            access=row.get("access", "free"),
-            free_url=clean_nan(row.get("free_url")),
-            paid_url=clean_nan(row.get("paid_url")),
-            cover_emoji=row.get("cover_emoji", "📖"),
-            match_score=float(row["match_score"]),
+    results = []
+    for i, row in top.iterrows():
+        title = clean_nan(row.get("title")) or ""
+        free_url = clean_nan(row.get("free_url"))
+        paid_url = clean_nan(row.get("paid_url"))
+        if not free_url and not paid_url:
+            paid_url = f"https://www.google.com/search?tbm=bks&q={urllib.parse.quote(title)}"
+
+        results.append(
+            BookRecommendation(
+                rank=i + 1,
+                title=title,
+                author=clean_nan(row.get("author")) or "",
+                category=clean_nan(row.get("category")) or "",
+                age_range=clean_nan(row.get("age_range")) or "",
+                description=str(clean_nan(row.get("description")) or "")[:200],
+                access=clean_nan(row.get("access")) or "free",
+                free_url=free_url,
+                paid_url=paid_url,
+                cover_emoji=clean_nan(row.get("cover_emoji")) or "📖",
+                match_score=float(row["match_score"]),
+            )
         )
-        for i, row in top.iterrows()
-    ]
+    return results

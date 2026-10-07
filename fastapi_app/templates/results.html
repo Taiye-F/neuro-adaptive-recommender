@@ -489,11 +489,11 @@
     <a href="{% if child %}/schedule/{{ child.id }}{% else %}/schedule{% endif %}" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Schedules</a>
     <a href="/community" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🤝 Village</a>
     <a href="{% if child %}/meltdown/{{ child.id }}/active{% else %}/meltdown{% endif %}" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🚨 Meltdowns</a>
-    <a href="/evidence" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Evidence</a>
     {% if user and user.role == 'clinician' %}
+    <a href="/evidence" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Evidence</a>
     <a href="/clinician/dashboard" style="font-family:var(--mono);font-size:0.74rem;color:#5ecfc5;border:1px solid #5ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Caseload</a>
-    {% endif %}
     <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a>
+    {% endif %}
     {% if user %}
     <button onclick="logout()" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;background:none;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;">Logout</button>
     {% endif %}
@@ -564,23 +564,29 @@
   {# Raw profile_text hidden from UI — still passed to chat context #}
 
   <!-- ── App Recommendations ────────────────────────────── -->
-  <div class="sec-head">📱 Recommended Apps &mdash; {% if high_risk %}Recommended Intervention Apps{% else %}Recommended Early Learning & Development Apps{% endif %}</div>
+  <div class="sec-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+    <span>📱 Show Me Top Apps &mdash; {% if high_risk %}Verified Intervention Apps{% else %}Early Learning & Development Apps{% endif %}</span>
+    {% if recommendations %}
+    <span style="font-size:0.75rem;font-weight:400;color:var(--ink-soft);font-family:var(--mono);">{{ recommendations|length }} Top Matched Tools</span>
+    {% endif %}
+  </div>
     <div class="rec-list">
       {% for rec in recommendations %}
       <div class="rec-card card" style="animation-delay:{{ loop.index * 0.07 }}s">
         <div class="rec-rank">#{{ rec.rank }}</div>
         <div>
           <div class="rec-name">
-  {% if rec.url %}
-    <a href="{{ rec.url }}" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed var(--teal);">{{ rec.app_name }}</a>
-  {% else %}
-    {{ rec.app_name }}
-  {% endif %}
-</div>
+            <a href="{{ rec.app_url or rec.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.35rem;">
+              {{ rec.app_name }} <span style="font-size:0.75rem;opacity:0.8;">↗</span>
+            </a>
+          </div>
           <div class="rec-meta">
             <span>{{ rec.category }}</span>
             <span>⭐ {{ rec.rating }}</span>
             <span>{{ rec.price }}</span>
+            <a href="{{ rec.app_url }}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);font-weight:600;text-decoration:none;background:rgba(94,207,197,0.12);padding:0.12rem 0.55rem;border-radius:4px;font-family:var(--sans);font-size:0.72rem;display:inline-flex;align-items:center;gap:0.25rem;">
+              View App ↗
+            </a>
           </div>
           <div class="rec-desc">{{ rec.description }}</div>
         </div>
@@ -590,9 +596,14 @@
         </div>
       </div>
       {% else %}
-      <p style="color:var(--ink-soft);font-size:0.87rem;padding:1rem 0;">
-        No app recommendations available — check that <code>app_cache.json</code> exists.
-      </p>
+      <div class="card" style="padding:1.5rem;text-align:center;background:var(--cream);border:1px dashed var(--border);">
+        <p style="color:var(--ink);font-weight:600;font-size:0.92rem;margin-bottom:0.35rem;">
+          No digital apps currently meet the relevance threshold for this specific profile.
+        </p>
+        <p style="color:var(--ink-soft);font-size:0.82rem;line-height:1.6;max-width:540px;margin:0 auto;">
+          Digital screen tools are not appropriate as primary interventions for all profiles. We recommend focusing on clinician-guided therapies and the evidence-based parental guidance guides below.
+        </p>
+      </div>
       {% endfor %}
     </div>
 
@@ -605,9 +616,13 @@
         <div style="flex-grow:1;">
           <div class="rec-name">
             {% if rec.access == 'free' and rec.free_url %}
-              <a href="{{ rec.free_url }}" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed var(--teal);">{{ rec.title }}</a>
-            {% elif rec.access == 'paid' and rec.paid_url %}
-              <a href="{{ rec.paid_url }}" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed var(--teal);">{{ rec.title }}</a>
+              <a href="{{ rec.free_url }}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.35rem;">
+                {{ rec.title }} <span style="font-size:0.75rem;">↗</span>
+              </a>
+            {% elif rec.paid_url %}
+              <a href="{{ rec.paid_url }}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.35rem;">
+                {{ rec.title }} <span style="font-size:0.75rem;">↗</span>
+              </a>
             {% else %}
               {{ rec.title }}
             {% endif %}
@@ -617,6 +632,15 @@
             <span>Category: {{ rec.category }}</span>
             <span>Age: {{ rec.age_range }}</span>
             <span class="badge" style="background:rgba(94, 207, 197, 0.15);color:#5ecfc5;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.68rem;text-transform:uppercase;margin-left:0.25rem;">{{ rec.access }}</span>
+            {% if rec.access == 'free' and rec.free_url %}
+              <a href="{{ rec.free_url }}" target="_blank" rel="noopener noreferrer" style="color:#0f5132;background:#d1e7dd;font-weight:600;text-decoration:none;padding:0.12rem 0.55rem;border-radius:4px;font-family:var(--sans);font-size:0.72rem;display:inline-flex;align-items:center;gap:0.25rem;">
+                Read Free PDF ↗
+              </a>
+            {% elif rec.paid_url %}
+              <a href="{{ rec.paid_url }}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);background:rgba(94,207,197,0.12);font-weight:600;text-decoration:none;padding:0.12rem 0.55rem;border-radius:4px;font-family:var(--sans);font-size:0.72rem;display:inline-flex;align-items:center;gap:0.25rem;">
+                View Guide ↗
+              </a>
+            {% endif %}
           </div>
           <div class="rec-desc" style="margin-top:0.4rem;">{{ rec.description }}</div>
         </div>

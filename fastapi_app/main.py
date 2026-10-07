@@ -407,9 +407,11 @@ async def screen(
 
 @app.get("/apps-page", response_class=HTMLResponse, tags=["UI"])
 def apps_page(request: Request, user: Optional[User] = Depends(get_current_user_from_cookie)):
-    """Render the apps catalogue page. Restricted to authenticated users."""
+    """Render the apps catalogue page. Restricted to clinician users."""
     if not user:
         return RedirectResponse(url="/login", status_code=303)
+    if user.role != "clinician":
+        return RedirectResponse(url="/", status_code=303)
 
     try:
         if state.df_apps.empty:
@@ -418,12 +420,17 @@ def apps_page(request: Request, user: Optional[User] = Depends(get_current_user_
         else:
             apps_list = []
             for _, row in state.df_apps.iterrows():
+                app_name = row["App_Name"]
+                link = row.get("App_Link") or row.get("app_url")
+                if not link or str(link).strip() == "":
+                    link = f"https://play.google.com/store/search?q={urllib.parse.quote(app_name)}&c=apps"
                 apps_list.append({
-                    "app_name": row["App_Name"],
+                    "app_name": app_name,
                     "category": row.get("Category", "Uncategorized"),
                     "rating": float(row.get("Rating", 0)),
                     "price": row.get("Price", "Free"),
                     "description": row.get("Description", "No description available.")[:200],
+                    "app_url": str(link),
                 })
             total = len(apps_list)
         
@@ -764,6 +771,8 @@ def evidence_explorer_view(
 ):
     if not user:
         return RedirectResponse(url="/login", status_code=303)
+    if user.role != "clinician":
+        return RedirectResponse(url="/", status_code=303)
 
     evidence_items = EvidenceRAGService.search_evidence(query="", top_k=20)
     return templates.TemplateResponse(

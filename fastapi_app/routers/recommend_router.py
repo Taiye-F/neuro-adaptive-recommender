@@ -43,7 +43,7 @@ def health():
 
 
 @recommend_router.get("/apps", response_model=AppsResponse, tags=["Apps"])
-def list_apps(current_user: User = Depends(RoleChecker(["parent", "clinician"]))):
+def list_apps(current_user: User = Depends(RoleChecker(["clinician"]))):
     if state.df_apps.empty:
         raise HTTPException(status_code=503, detail="App cache not loaded.")
     apps = [
@@ -84,7 +84,7 @@ def predict(
 @recommend_router.post("/recommend", response_model=RecommendResponse, tags=["Inference"])
 def recommend(
     request: RecommendRequest,
-    current_user: User = Depends(RoleChecker(["parent", "clinician"]))
+    current_user: User = Depends(RoleChecker(["clinician"]))
 ):
     t0          = time.time()
     scores      = request.model_dump(exclude={"top_n"})
